@@ -16,7 +16,7 @@ logger.addHandler(console)
 app_logger = logging.getLogger('scheduler.app')
 
 start_time = time.time()
-year, mnth = 2022, 4
+year, mnth = 2022, 9
 app_logger.info('Working on a schedule solution for month %s %s', Month.MONTH_NAMES[mnth - 1], year)
 
 ss_manager = ScheduleSSManager(year, mnth)
@@ -35,7 +35,7 @@ response_stats = solver.ResponseStats()
 
 solution = solution_printer.solution
 
-# ss_manager.insert_shifts(schedule.create_schedule_matrix(solution))
+ss_manager.insert_shifts(schedule.create_schedule_matrix(solution))
 
 end_time = time.time()
 elapsed_time = end_time - start_time

@@ -5,10 +5,16 @@ import random
 from calendar import monthrange
 from datetime import date, timedelta
 from functools import cached_property
+import time
 from typing import List, Dict
 
 from interface import ScheduleSSManager
 from utils import TimerLog
+
+import colorama
+from colorama import Fore
+
+colorama.init(autoreset=True)
 
 ZERO_DAY = date(2022, 1, 1)
 CYCLE_SUCCESSION = [3, 1, 4, 3, 2, 4, 1, 2]
@@ -442,7 +448,7 @@ class Schedule:
     @TimerLog(logger_name='scheduler.models')
     def shifts_to_work_per_nurse(self):
         shifts_to_work_per_nurse = {}
-        for nurse in self.nurses:
+        for nurse in self.available_nurses:
             shifts_to_work_per_nurse[nurse] = nurse.shifts_to_work(
                 self.month, off_days=len(self.off_days[nurse])
             )
@@ -458,7 +464,7 @@ class Schedule:
 
     @cached_property
     def updated_shifts_to_work_per_cycle(self):
-        shifts_to_work_per_cycle = self.shifts_to_work_per_cycle
+        shifts_to_work_per_cycle = copy.deepcopy(self.shifts_to_work_per_cycle)
         for nurse in self.nurses_with_not_enough_cycle_timeslots:
             shifts_to_work_per_cycle[nurse.cycle] -= self.nurses_with_not_enough_cycle_timeslots[nurse][
                 'extra_timeslots_needed']
@@ -470,11 +476,7 @@ class Schedule:
         the_nurses_per_timeslot = {str(ts): [] for ts in self.month.timeslots}
         for ts in self.month.timeslots:
             for nurse in self.available_nurses:
-                if (
-                        nurse.cycle == ts.cycle
-                        and ts.day not in self.rest_leave_days[nurse]
-                        and not (ts.part == 2 and ts.day + timedelta(days=1) in self.rest_leave_days[nurse])
-                ):
+                if nurse.cycle == ts.cycle and not ts.overlaps_with(self.rest_leave_days[nurse]):
                     the_nurses_per_timeslot[str(ts)].append(nurse)
         return the_nurses_per_timeslot
 
@@ -564,7 +566,7 @@ class Schedule:
         # * Phase 1 nurse distribution
         for ts in self.month.timeslots:
             available_nurses = len(self.available_nurses_per_timeslot[str(ts)])
-            avg_nurses_per_ts = cycle_details[cycle]["avg_nurses_per_ts"]
+            avg_nurses_per_ts = cycle_details[ts.cycle]["avg_nurses_per_ts"]
             num_nurses = min(available_nurses, avg_nurses_per_ts)
 
             if available_nurses <= avg_nurses_per_ts:
@@ -595,11 +597,6 @@ class Schedule:
         # * Phase 2 nurse distribution
         for cycle in [1, 2, 3, 4]:
             while cycle_details[cycle]["unplanned_shiftslots"] > 0:
-                # logger.debug(
-                #     "Entering new loop for cycle %s. %s unplanned shiftslots left.", cycle,
-                #     cycle_details[cycle]['unplanned_shiftslots'])
-
-                # * Check if there are available nurses after phase 2 nurse distribution and update the flag
                 for ts in nurses_per_timeslot:
                     available_nurses = len(self.available_nurses_per_timeslot[ts])
                     ts_nurses = nurses_per_timeslot[ts]["num_nurses"]
@@ -613,15 +610,6 @@ class Schedule:
                     if nurses_per_timeslot[ts]["flag"] != "max_available"
                        and nurses_per_timeslot[ts]["cycle"] == cycle
                 ]
-                # logger.debug("Timeslots with available nurses: %s", len(ts_wth_avail_nurses))
-                # print(ts_wth_avail_nurses)
-                if not ts_wth_avail_nurses:
-                    cycle_timeslots = [
-                        nurses_per_timeslot[ts]
-                        for ts in nurses_per_timeslot
-                        if nurses_per_timeslot[ts]['cycle'] == cycle
-                    ]
-                    print(cycle_timeslots)
 
                 # * Get min number of nurses per timeslot from timeslots with available nurses
                 min_nurses_per_ts = sorted(ts_wth_avail_nurses, key=lambda ts: ts["num_nurses"])[
@@ -658,6 +646,7 @@ class Schedule:
         for nurse in extra_shiftslots:
             for timeslot in extra_shiftslots[nurse]:
                 nurses_per_timeslot[str(timeslot)]['num_nurses'] += 1
+                nurses_per_timeslot[str(timeslot)]['flag'] += ' + 1 off cycle'
 
         return nurses_per_timeslot
 
