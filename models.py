@@ -5,16 +5,10 @@ import random
 from calendar import monthrange
 from datetime import date, timedelta
 from functools import cached_property
-import time
 from typing import List, Dict
 
 from interface import ScheduleSSManager
 from utils import TimerLog
-
-import colorama
-from colorama import Fore
-
-colorama.init(autoreset=True)
 
 ZERO_DAY = date(2022, 1, 1)
 CYCLE_SUCCESSION = [3, 1, 4, 3, 2, 4, 1, 2]

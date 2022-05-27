@@ -1,5 +1,3 @@
-from datetime import timedelta
-import logging
 from ortools.sat.python import cp_model
 
 from utils import TimerLog
