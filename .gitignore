@@ -1,0 +1,5 @@
+__pycache__/
+venv/
+.idea/
+secrets.py
+iosif_upu_service_account.json
