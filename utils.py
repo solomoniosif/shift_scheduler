@@ -15,9 +15,10 @@ class TimerError(Exception):
 
 class TimerLog:
 
-    def __init__(self, logger_name, name=None):
+    def __init__(self, logger_name, text=None, name=None):
         self.logger_name = logger_name
         self.logger = logging.getLogger(self.logger_name)
+        self.text = text
         self.name = name
         self._start_time = None
 
@@ -34,7 +35,12 @@ class TimerLog:
         elapsed_time = time.perf_counter() - self._start_time
         self._start_time = None
 
-        if self.logger:
+        if self.text:
+            self.logger.debug(
+                Fore.LIGHTMAGENTA_EX + '%s' + Fore.WHITE + ' executed in ' + Fore.LIGHTRED_EX +
+                '%s ' + Fore.WHITE + 'seconds', self.text, round(elapsed_time, 2)
+            )
+        else:
             self.logger.debug(
                 Fore.WHITE + 'Function ' + Fore.GREEN + '%s ' + Fore.WHITE + 'executed in' +
                 Fore.LIGHTRED_EX + ' %s ' + Fore.WHITE + 'seconds',
