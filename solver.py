@@ -20,59 +20,77 @@ class ScheduleModel(cp_model.CpModel):
         self.variables = self._create_shift_variables()
         self._add_constraints()
 
-    @TimerLog(logger_name='scheduler.solver')
+    # @TimerLog(logger_name='scheduler.solver')
+    # def _create_shift_variables(self):
+    #     variables = {}
+    #     for n, nurse in enumerate(self.schedule.available_nurses):
+    #         for t, timeslot in enumerate(self.schedule.month.timeslots):
+    #             for s, shift in enumerate(self.schedule.all_shifts[str(timeslot)]):
+    #                 if nurse.can_work_shift(shift) and not timeslot.overlaps_with(self.schedule.rest_leave_days[nurse]):
+    #                     variables[(n, t, s)] = self.NewBoolVar(
+    #                         f"{timeslot} | {nurse} works on {shift.position.sector.short_name}")
+    #
+    #     extra_ts = self.schedule.extra_ts_for_nurses_with_ts_deficit
+    #     for n, nurse in enumerate(self.schedule.available_nurses):
+    #         if nurse in extra_ts:
+    #             for t, timeslot in enumerate(self.schedule.month.timeslots):
+    #                 if timeslot in extra_ts[nurse]:
+    #                     for s, shift in enumerate(self.schedule.all_shifts[str(timeslot)]):
+    #                         if nurse.can_work_shift(shift, off_cycle=True):
+    #                             variables[(n, t, s)] = self.NewBoolVar(
+    #                                 f"{timeslot} | {nurse} works on {shift.position.sector.short_name}")
+    #     return variables
+
     def _create_shift_variables(self):
         variables = {}
-        for n, nurse in enumerate(self.schedule.available_nurses):
-            for t, timeslot in enumerate(self.schedule.month.timeslots):
-                for s, shift in enumerate(self.schedule.all_shifts[str(timeslot)]):
+        for nurse in self.schedule.available_nurses:
+            for timeslot in self.schedule.month.timeslots:
+                for shift in self.schedule.all_shifts[str(timeslot)]:
                     if nurse.can_work_shift(shift) and not timeslot.overlaps_with(self.schedule.rest_leave_days[nurse]):
-                        variables[(n, t, s)] = self.NewBoolVar(
+                        variables[(nurse.id, timeslot.id, shift.id)] = self.NewBoolVar(
                             f"{timeslot} | {nurse} works on {shift.position.sector.short_name}")
 
-        extra_ts = self.schedule.extra_ts_for_nurses_with_ts_deficit
-        for n, nurse in enumerate(self.schedule.available_nurses):
-            if nurse in extra_ts:
-                for t, timeslot in enumerate(self.schedule.month.timeslots):
-                    if timeslot in extra_ts[nurse]:
-                        for s, shift in enumerate(self.schedule.all_shifts[str(timeslot)]):
-                            if nurse.can_work_shift(shift, off_cycle=True):
-                                variables[(n, t, s)] = self.NewBoolVar(
-                                    f"{timeslot} | {nurse} works on {shift.position.sector.short_name}")
+        extra_timeslots = self.schedule.extra_ts_for_nurses_with_ts_deficit
+        for nurse in extra_timeslots:
+            for timeslot in extra_timeslots[nurse]:
+                for shift in self.schedule.all_shifts[str(timeslot)]:
+                    if nurse.can_work_shift(shift, off_cycle=True):
+                        variables[(nurse.id, timeslot.id, shift.id)] = self.NewBoolVar(
+                            f"{timeslot} | {nurse} works on {shift.position.sector.short_name}")
         return variables
 
     def _add_no_double_assignment(self):
-        for t, timeslot in enumerate(self.schedule.month.timeslots):
-            for s, shift in enumerate(self.schedule.all_shifts[str(timeslot)]):
+        for timeslot in self.schedule.month.timeslots:
+            for shift in self.schedule.all_shifts[str(timeslot)]:
                 self.Add(
                     sum(
-                        [self.variables[(n, t, s)]
-                         for n, nurse in enumerate(self.schedule.available_nurses)
-                         if (n, t, s) in self.variables]
+                        [self.variables[(nurse.id, timeslot.id, shift.id)]
+                         for nurse in self.schedule.available_nurses
+                         if (nurse.id, timeslot.id, shift.id) in self.variables]
                     ) == 1
                 )
 
     def _add_single_shift_per_timeslot(self):
-        for n, nurse in enumerate(self.schedule.available_nurses):
-            for t, timeslot in enumerate(self.schedule.month.timeslots):
+        for nurse in self.schedule.available_nurses:
+            for timeslot in self.schedule.month.timeslots:
                 self.Add(
                     sum(
-                        self.variables[(n, t, s)]
-                        for s, shift in enumerate(self.schedule.all_shifts[str(timeslot)])
-                        if (n, t, s) in self.variables
+                        self.variables[(nurse.id, timeslot.id, shift.id)]
+                        for shift in self.schedule.all_shifts[str(timeslot)]
+                        if (nurse.id, timeslot.id, shift.id) in self.variables
                     ) <= 1
                 )
 
     def _add_number_of_shifts_per_nurse(self):
         nurses_with_not_enough_cycle_timeslots = self.schedule.nurses_with_not_enough_cycle_timeslots
-        for n, nurse in enumerate(self.schedule.available_nurses):
+        for nurse in self.schedule.available_nurses:
             if nurse not in nurses_with_not_enough_cycle_timeslots:
                 shifts_to_work = self.schedule.shifts_to_work_per_nurse[nurse]
                 planned_shifts = [
-                    self.variables[(n, t, s)]
-                    for t, timeslot in enumerate(self.schedule.month.timeslots)
-                    for s, shift in enumerate(self.schedule.all_shifts[str(timeslot)])
-                    if (n, t, s) in self.variables
+                    self.variables[(nurse.id, timeslot.id, shift.id)]
+                    for timeslot in self.schedule.month.timeslots
+                    for shift in self.schedule.all_shifts[str(timeslot)]
+                    if (nurse.id, timeslot.id, shift.id) in self.variables
                 ]
                 self.Add(sum(planned_shifts) == shifts_to_work)
 
@@ -95,14 +113,14 @@ class SolutionCollector(cp_model.CpSolverSolutionCallback):
 
     @TimerLog(logger_name='scheduler.solver')
     def on_solution_callback(self):
-        for t, timeslot in enumerate(self.timeslots):
-            for n, nurse in enumerate(self.nurses):
-                for s, shift in enumerate(self.shifts[str(timeslot)]):
-                    if (n, t, s) in self.variables and self.Value(
-                            self.variables[(n, t, s)]
+        for t in self.timeslots:
+            for n in self.nurses:
+                for s in self.shifts[str(t)]:
+                    if (n.id, t.id, s.id) in self.variables and self.Value(
+                            self.variables[(n.id, t.id, s.id)]
                     ):
-                        shift.nurse = nurse
-                        if nurse in self.solution:
-                            self.solution[nurse].append(shift)
+                        s.nurse = n
+                        if n in self.solution:
+                            self.solution[n].append(s)
                         else:
-                            self.solution[nurse] = [shift]
+                            self.solution[n] = [s]
