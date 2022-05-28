@@ -256,7 +256,7 @@ class Shift:
 
     @property
     def id(self) -> int:
-        return self.timeslot.id
+        return int(str(self.timeslot.id) + str(self.position.id).rjust(2, '0'))
 
     @property
     def cycle(self) -> int:
@@ -296,7 +296,6 @@ class Schedule:
         self.year = ss_manager.year
         self.mnth = ss_manager.month
         self.working_days = self.month.working_days
-        self.available_nurses = [n for n in self.nurses if n.cycle in [1, 2, 3, 4]]
         self.positions_per_timeslot = {str(ts): self.positions for ts in self.month.timeslots}
         self.schedule_matrix = [["" for _ in range(self.month.num_days * 2)] for n in range(100)]
 
@@ -331,6 +330,10 @@ class Schedule:
                     )
                 )
         return nurses
+
+    @cached_property
+    def available_nurses(self):
+        return [n for n in self.nurses if n.cycle in [1, 2, 3, 4]]
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
@@ -437,6 +440,36 @@ class Schedule:
                     if day.month == self.month.month and day in self.working_days:
                         off_days[nurse].append(day)
         return off_days
+
+    @cached_property
+    def available_nurses_per_position(self, cycle=None):
+        if not cycle:
+            nurses_per_sector = {s.short_name: [] for s in self.sectors}
+            for nurse in self.available_nurses:
+                for position in nurse.positions:
+                    if position in nurses_per_sector:
+                        nurses_per_sector[position].append(nurse)
+            return nurses_per_sector
+        else:
+            nurses_per_sector = {s.short_name: [] for s in self.sectors}
+            for nurse in self.available_nurses:
+                if nurse.cycle == cycle:
+                    for position in nurse.positions:
+                        if position in nurses_per_sector:
+                            nurses_per_sector[position].append(nurse)
+            return nurses_per_sector
+
+    @cached_property
+    def available_nurses_per_position_per_timeslot(self):
+        nurses_per_position_per_timeslot = {str(ts): {} for ts in self.month.timeslots}
+        for timeslot in self.available_nurses_per_timeslot:
+            for nurse in self.available_nurses_per_timeslot[timeslot]:
+                for position in nurse.positions:
+                    if position in nurses_per_position_per_timeslot[timeslot]:
+                        nurses_per_position_per_timeslot[timeslot][position].append(nurse)
+                    else:
+                        nurses_per_position_per_timeslot[timeslot][position] = [nurse]
+        return nurses_per_position_per_timeslot
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
