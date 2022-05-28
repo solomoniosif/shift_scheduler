@@ -6,7 +6,7 @@ from ortools.sat.python import cp_model
 from interface import ScheduleSSManager
 from models import Month, Schedule
 from solver import ScheduleModel, SolutionCollector
-from utils import CustomFormatter
+from utils import CustomFormatter, TimerLog
 
 logger = logging.getLogger('scheduler')
 logger.setLevel(logging.DEBUG)
@@ -15,30 +15,31 @@ console.setFormatter(CustomFormatter())
 logger.addHandler(console)
 app_logger = logging.getLogger('scheduler.app')
 
-start_time = time.time()
-year, mnth = 2022, 9
-app_logger.info('Working on a schedule solution for month %s %s', Month.MONTH_NAMES[mnth - 1], year)
 
-ss_manager = ScheduleSSManager(year, mnth)
-this_month_ss = ss_manager.get_or_create_new_ss()
-schedule = Schedule(ss_manager)
-model = ScheduleModel(schedule)
+@TimerLog(logger_name='scheduler.app', text="Schedule generation")
+def main():
+    start_time = time.time()
+    year, mnth = 2022, 5
+    app_logger.info('Working on a schedule solution for month %s %s', Month.MONTH_NAMES[mnth - 1], year)
 
-solver = cp_model.CpSolver()
-solution_printer = SolutionCollector(model.variables, schedule)
+    ss_manager = ScheduleSSManager(year, mnth)
+    this_month_ss = ss_manager.get_or_create_new_ss()
+    schedule = Schedule(ss_manager)
+    model = ScheduleModel(schedule)
 
-status = solver.Solve(model, solution_printer)
+    solver = cp_model.CpSolver()
+    solution_printer = SolutionCollector(model.variables, schedule)
 
-app_logger.debug("Solution status: %s", solver.StatusName())
+    status = solver.Solve(model, solution_printer)
 
-response_stats = solver.ResponseStats()
+    app_logger.debug("Solution status: %s", solver.StatusName())
 
-solution = solution_printer.solution
+    response_stats = solver.ResponseStats()
 
-ss_manager.insert_shifts(schedule.create_schedule_matrix(solution))
+    solution = solution_printer.solution
 
-end_time = time.time()
-elapsed_time = end_time - start_time
-if solver.StatusName() == 'OPTIMAL':
-    app_logger.info('Schedule generation for month %s took %s seconds', Month.MONTH_NAMES[mnth - 1],
-                    round(elapsed_time, 2))
+    ss_manager.insert_shifts(schedule.create_schedule_matrix(solution))
+
+
+if __name__ == '__main__':
+    main()
