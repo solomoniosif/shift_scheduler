@@ -20,27 +20,6 @@ class ScheduleModel(cp_model.CpModel):
         self.variables = self._create_shift_variables()
         self._add_constraints()
 
-    # @TimerLog(logger_name='scheduler.solver')
-    # def _create_shift_variables(self):
-    #     variables = {}
-    #     for n, nurse in enumerate(self.schedule.available_nurses):
-    #         for t, timeslot in enumerate(self.schedule.month.timeslots):
-    #             for s, shift in enumerate(self.schedule.all_shifts[str(timeslot)]):
-    #                 if nurse.can_work_shift(shift) and not timeslot.overlaps_with(self.schedule.rest_leave_days[nurse]):
-    #                     variables[(n, t, s)] = self.NewBoolVar(
-    #                         f"{timeslot} | {nurse} works on {shift.position.sector.short_name}")
-    #
-    #     extra_ts = self.schedule.extra_ts_for_nurses_with_ts_deficit
-    #     for n, nurse in enumerate(self.schedule.available_nurses):
-    #         if nurse in extra_ts:
-    #             for t, timeslot in enumerate(self.schedule.month.timeslots):
-    #                 if timeslot in extra_ts[nurse]:
-    #                     for s, shift in enumerate(self.schedule.all_shifts[str(timeslot)]):
-    #                         if nurse.can_work_shift(shift, off_cycle=True):
-    #                             variables[(n, t, s)] = self.NewBoolVar(
-    #                                 f"{timeslot} | {nurse} works on {shift.position.sector.short_name}")
-    #     return variables
-
     def _create_shift_variables(self):
         variables = {}
         for nurse in self.schedule.available_nurses:
