@@ -74,10 +74,44 @@ class ScheduleModel(cp_model.CpModel):
                 self.Add(sum(planned_shifts) == shifts_to_work)
 
     @TimerLog(logger_name='scheduler.solver')
+    def _add_min_positions(self):
+        def add_min_nurse_position(nurse, sector, min_shifts):
+            planned_shifts = []
+            for timeslot in self.schedule.month.timeslots:
+                for shift in self.schedule.all_shifts[str(timeslot)]:
+                    if (nurse.id, timeslot.id, shift.id) in self.variables and shift.position.sector == sector:
+                        planned_shifts.append(self.variables[(nurse.id, timeslot.id, shift.id)])
+            self.Add(sum(planned_shifts) >= min_shifts)
+
+        for nurse in self.schedule.nurse_position_ranges:
+            for sector in self.schedule.nurse_position_ranges[nurse]:
+                min_shifts = self.schedule.nurse_position_ranges[nurse][sector]['min']
+                if min_shifts is not None:
+                    add_min_nurse_position(nurse, sector, min_shifts)
+
+    @TimerLog(logger_name='scheduler.solver')
+    def _add_max_positions(self):
+        def add_max_nurse_position(nurse, sector, max_shifts):
+            planned_shifts = []
+            for timeslot in self.schedule.month.timeslots:
+                for shift in self.schedule.all_shifts[str(timeslot)]:
+                    if (nurse.id, timeslot.id, shift.id) in self.variables and shift.position.sector == sector:
+                        planned_shifts.append(self.variables[(nurse.id, timeslot.id, shift.id)])
+            self.Add(sum(planned_shifts) <= max_shifts)
+
+        for nurse in self.schedule.nurse_position_ranges:
+            for sector in self.schedule.nurse_position_ranges[nurse]:
+                max_shifts = self.schedule.nurse_position_ranges[nurse][sector]['max']
+                if max_shifts is not None:
+                    add_max_nurse_position(nurse, sector, max_shifts)
+
+    @TimerLog(logger_name='scheduler.solver')
     def _add_constraints(self):
         self._add_no_double_assignment()
         self._add_single_shift_per_timeslot()
         self._add_number_of_shifts_per_nurse()
+        self._add_min_positions()
+        self._add_max_positions()
 
 
 class SolutionCollector(cp_model.CpSolverSolutionCallback):
