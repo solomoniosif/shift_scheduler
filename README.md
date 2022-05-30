@@ -67,13 +67,13 @@ The file **utils.py** contains at the moment the class decorator class **TimerLo
 
 
 
-## Usage
+##  :information_source: Usage
 
 The project cannot be properly run without the input data that cannot be shared here, but can be used as inspiration for other projects. 
 
 
 
-## Built with
+## :wrench: Built with
 
 This project makes use of
 
