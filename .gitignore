@@ -2,5 +2,6 @@ __pycache__/
 venv/
 .idea/
 secrets.py
+scrap.py
 client_secrets.json
 iosif_upu_service_account.json
