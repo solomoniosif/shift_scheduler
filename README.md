@@ -10,6 +10,7 @@ A personal project for generating the monthly schedule for nurses at the Emergen
 
 Creating the monthly schedule for 80+ nurses with only pen & paper when you have into account a multitude of constraints like:
 
+<<<<<<< HEAD
 	- *exact number of shifts needed for each nurse*
 	- *minimum number of nurses needed per timeslot*
 	- *nurses with different abilities/skills* - not all nurses can work on all positions in the department
@@ -17,6 +18,15 @@ Creating the monthly schedule for 80+ nurses with only pen & paper when you have
 	- *planned rest leave days*
 	- *fair shift allocation*
 	- *nurse requests*
+=======
+- **exact number of shifts needed for each nurse**
+- **minimum number of nurses needed per timeslot**
+- **nurses with different abilities/skills** - not all nurses can work on all positions in the department
+- **4-day shift plan** (*12/24/12/48*) - employees work in shifts of 12 hours; first a *day shift*, followed by 24 rest hours, then a *night shift* , finishing with 48 rest hours. Each nurse is part of a team or cycle and should only (preferably) be assign shifts on the corresponding cycle.
+- **planned rest leave days**
+- **fair shift allocation**
+- **nurse requests**
+>>>>>>> 54361307b5abbb8e5d64f10bce16ec543adc67c6
 
 is a tiresome and time-consuming task. A computer can do that job in matter of seconds if given the right instructions.
 
