@@ -1,5 +1,4 @@
 import logging
-import time
 
 from ortools.sat.python import cp_model
 
@@ -18,7 +17,6 @@ app_logger = logging.getLogger('scheduler.app')
 
 @TimerLog(logger_name='scheduler.app', text="Schedule generation")
 def main():
-    start_time = time.time()
     year, mnth = 2022, 5
     app_logger.info('Working on a schedule solution for month %s %s', Month.MONTH_NAMES[mnth - 1], year)
 
