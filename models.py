@@ -472,6 +472,17 @@ class Schedule:
         return nurses_per_position_per_timeslot
 
     @cached_property
+    def timeslots_with_skill_deficit(self):
+        def filter_sectors(sector, threshold=4, exclude=('E', '8', '12')):
+            return dict(filter(lambda s: len(s[1]) <= threshold and s[0] not in exclude, sector.items()))
+
+        timeslots_with_skill_deficit = {ts: filter_sectors(sector) for (ts, sector) in
+                                        self.available_nurses_per_position_per_timeslot.items() if
+                                        filter_sectors(sector)}
+
+        return timeslots_with_skill_deficit
+
+    @cached_property
     @TimerLog(logger_name='scheduler.models')
     def shifts_to_work_per_nurse(self):
         shifts_to_work_per_nurse = {}
