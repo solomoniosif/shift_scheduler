@@ -381,7 +381,7 @@ class Schedule:
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def nurse_sector_ranges(self):
+    def nurse_position_ranges(self):
         nurse_ranges_matrix = self.ss_manager.nurse_min_max
         filtered_sectors = dict(
             filter(lambda val: val[0] <= 13, self.sectors_lookup.items())
