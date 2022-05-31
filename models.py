@@ -441,24 +441,6 @@ class Schedule:
                         off_days[nurse].append(day)
         return off_days
 
-    # @cached_property
-    # def available_nurses_per_position(self, cycle=None):
-    #     if not cycle:
-    #         nurses_per_sector = {s.short_name: [] for s in self.sectors}
-    #         for nurse in self.available_nurses:
-    #             for position in nurse.positions:
-    #                 if position in nurses_per_sector:
-    #                     nurses_per_sector[position].append(nurse)
-    #         return nurses_per_sector
-    #     else:
-    #         nurses_per_sector = {s.short_name: [] for s in self.sectors}
-    #         for nurse in self.available_nurses:
-    #             if nurse.cycle == cycle:
-    #                 for position in nurse.positions:
-    #                     if position in nurses_per_sector:
-    #                         nurses_per_sector[position].append(nurse)
-    #         return nurses_per_sector
-
     @cached_property
     def available_nurses_per_position_per_timeslot(self):
         positions = {s.short_name: None for s in self.sectors[:12]}
