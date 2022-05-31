@@ -4,7 +4,7 @@ import math
 import random
 from calendar import monthrange
 from datetime import date, timedelta
-from functools import cached_property
+from functools import cached_property, reduce
 from typing import List, Dict
 
 from interface import ScheduleSSManager
@@ -441,46 +441,70 @@ class Schedule:
                         off_days[nurse].append(day)
         return off_days
 
-    @cached_property
-    def available_nurses_per_position(self, cycle=None):
-        if not cycle:
-            nurses_per_sector = {s.short_name: [] for s in self.sectors}
-            for nurse in self.available_nurses:
-                for position in nurse.positions:
-                    if position in nurses_per_sector:
-                        nurses_per_sector[position].append(nurse)
-            return nurses_per_sector
-        else:
-            nurses_per_sector = {s.short_name: [] for s in self.sectors}
-            for nurse in self.available_nurses:
-                if nurse.cycle == cycle:
-                    for position in nurse.positions:
-                        if position in nurses_per_sector:
-                            nurses_per_sector[position].append(nurse)
-            return nurses_per_sector
+    # @cached_property
+    # def available_nurses_per_position(self, cycle=None):
+    #     if not cycle:
+    #         nurses_per_sector = {s.short_name: [] for s in self.sectors}
+    #         for nurse in self.available_nurses:
+    #             for position in nurse.positions:
+    #                 if position in nurses_per_sector:
+    #                     nurses_per_sector[position].append(nurse)
+    #         return nurses_per_sector
+    #     else:
+    #         nurses_per_sector = {s.short_name: [] for s in self.sectors}
+    #         for nurse in self.available_nurses:
+    #             if nurse.cycle == cycle:
+    #                 for position in nurse.positions:
+    #                     if position in nurses_per_sector:
+    #                         nurses_per_sector[position].append(nurse)
+    #         return nurses_per_sector
 
     @cached_property
     def available_nurses_per_position_per_timeslot(self):
-        nurses_per_position_per_timeslot = {str(ts): {} for ts in self.month.timeslots}
-        for timeslot in self.available_nurses_per_timeslot:
-            for nurse in self.available_nurses_per_timeslot[timeslot]:
-                for position in nurse.positions:
-                    if position in nurses_per_position_per_timeslot[timeslot]:
-                        nurses_per_position_per_timeslot[timeslot][position].append(nurse)
-                    else:
-                        nurses_per_position_per_timeslot[timeslot][position] = [nurse]
+        positions = {s.short_name: None for s in self.sectors[:12]}
+        nurses_per_position_per_timeslot = {}
+
+        def filter_nurses_by_position(nurses, pos):
+            return [n for n in nurses if pos in n.positions]
+
+        for timeslot in self.month.timeslots:
+            ts_nurses = self.available_nurses_per_timeslot[str(timeslot)]
+            for pos in positions:
+                nurses_per_position_per_timeslot[(str(timeslot), pos)] = filter_nurses_by_position(ts_nurses, pos)
+
         return nurses_per_position_per_timeslot
 
     @cached_property
     def timeslots_with_skill_deficit(self):
-        def filter_sectors(sector, threshold=4, exclude=('E', '8', '12')):
-            return dict(filter(lambda s: len(s[1]) <= threshold and s[0] not in exclude, sector.items()))
+        def filter_sectors(sectors, threshold=3, exclude=('E', '8', '12', 'S')):
+            return dict(filter(lambda s: len(s[1]) <= threshold and s[0] not in exclude, sectors.items()))
 
         timeslots_with_skill_deficit = {ts: filter_sectors(sector) for (ts, sector) in
                                         self.available_nurses_per_position_per_timeslot.items() if
                                         filter_sectors(sector)}
 
         return timeslots_with_skill_deficit
+
+    @cached_property
+    def unfillable_positions(self):
+        unfillable_positions = {}
+
+        def filter_unique_nurses(ts_dict):
+            return set(reduce(lambda x, y: x + y, ts_dict.values()))
+
+        for ts in self.timeslots_with_skill_deficit:
+            timeslot = self.timeslots_with_skill_deficit[ts]
+            positions = len(timeslot)
+            nurses = len(filter_unique_nurses(timeslot))
+            if nurses < positions:
+                unfillable_positions[ts] = timeslot
+
+        for ts in self.available_nurses_per_position_per_timeslot:
+            for position in self.available_nurses_per_position_per_timeslot[ts]:
+                if not self.available_nurses_per_position_per_timeslot[ts][position]:
+                    unfillable_positions[ts] = position
+
+        return unfillable_positions
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
