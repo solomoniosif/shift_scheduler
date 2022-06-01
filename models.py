@@ -458,12 +458,9 @@ class Schedule:
 
     @cached_property
     def timeslots_with_skill_deficit(self):
-        def filter_sectors(sectors, threshold=3, exclude=('E', '8', '12', 'S')):
-            return dict(filter(lambda s: len(s[1]) <= threshold and s[0] not in exclude, sectors.items()))
-
-        timeslots_with_skill_deficit = {ts: filter_sectors(sector) for (ts, sector) in
+        timeslots_with_skill_deficit = {ts_pos: nurses for (ts_pos, nurses) in
                                         self.available_nurses_per_position_per_timeslot.items() if
-                                        filter_sectors(sector)}
+                                        ts_pos[1] in ('Rt', 'Nn', 'S') and len(nurses) <= 3}
 
         return timeslots_with_skill_deficit
 
