@@ -36,7 +36,17 @@ class ScheduleModel(cp_model.CpModel):
                     if nurse.can_work_shift(shift, off_cycle=True):
                         variables[(nurse.id, timeslot.id, shift.id)] = self.NewBoolVar(
                             f"{timeslot} | {nurse} works on {shift.position.sector.short_name}")
+
+        for shift in self.schedule.fixed_assignments:
+            if (shift.assigned_nurse.id, shift.timeslot.id, shift.id) not in variables:
+                variables[(shift.assigned_nurse.id, shift.timeslot.id, shift.id)] = self.NewBoolVar(
+                    f"{shift.timeslot} | {shift.assigned_nurse} works on {shift.position.sector.short_name}")
+
         return variables
+
+    def _add_fixed_assignment(self):
+        for shift in self.schedule.fixed_assignments:
+            self.Add(self.variables[(shift.assigned_nurse.id, shift.timeslot.id, shift.id)] == 1)
 
     def _add_no_double_assignment(self):
         for timeslot in self.schedule.month.timeslots:
@@ -107,6 +117,7 @@ class ScheduleModel(cp_model.CpModel):
 
     @TimerLog(logger_name='scheduler.solver')
     def _add_constraints(self):
+        self._add_fixed_assignment()
         self._add_no_double_assignment()
         self._add_single_shift_per_timeslot()
         self._add_number_of_shifts_per_nurse()
