@@ -442,6 +442,27 @@ class Schedule:
         return off_days
 
     @cached_property
+    def fixed_assignments(self):
+        fixed_assignments = []
+        for row in self.ss_manager.fixed_assignments:
+            if row[1] != "":
+                nurse_id = int(row[0])
+                nurse = self.nurses_lookup[nurse_id]
+                for col in range(3, self.month.num_days * 2 + 3):
+                    if row[col] != "":
+                        day = date(self.month.year,
+                                   self.month.month, (col - 1) // 2)
+                        part = (col + 1) % 2 + 1
+                        ts = TimeSlot(day, part)
+                        for pos in self.positions_per_timeslot[str(ts)]:
+                            if pos.sector.short_name == row[col]:
+                                position = pos
+                                shift = Shift(ts, position, nurse)
+                                fixed_assignments.append(shift)
+                                break
+        return fixed_assignments
+
+    @cached_property
     def available_nurses_per_position_per_timeslot(self):
         positions = {s.short_name: None for s in self.sectors[:12]}
         nurses_per_position_per_timeslot = {}
@@ -703,27 +724,6 @@ class Schedule:
                 all_shifts[str(ts)].append(shift)
 
         return all_shifts
-
-    @cached_property
-    def fixed_assignments(self):
-        fixed_assignments = []
-        for row in self.ss_manager.fixed_assignments:
-            if row[1] != "":
-                nurse_id = int(row[0])
-                nurse = self.nurses_lookup[nurse_id]
-                for col in range(3, self.month.num_days * 2 + 3):
-                    if row[col] != "":
-                        day = date(self.month.year,
-                                   self.month.month, (col - 1) // 2)
-                        part = (col + 1) % 2 + 1
-                        ts = TimeSlot(day, part)
-                        for pos in self.positions_per_timeslot[str(ts)]:
-                            if pos.sector.short_name == row[col]:
-                                position = pos
-                                shift = Shift(ts, position, nurse)
-                                fixed_assignments.append(shift)
-                                break
-        return fixed_assignments
 
     def _add_shifts_to_schedule_matrix(self, solution_dict):
         for nurse in solution_dict:
