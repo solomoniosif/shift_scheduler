@@ -463,6 +463,24 @@ class Schedule:
         return fixed_assignments
 
     @cached_property
+    def off_cycle_shifts_from_fixed_assignments(self):
+        off_cycle_shifts = []
+        for shift in self.fixed_assignments:
+            if shift.assigned_nurse in self.available_nurses and shift.cycle != shift.assigned_nurse.cycle:
+                off_cycle_shifts.append(shift)
+        return off_cycle_shifts
+
+    @cached_property
+    def off_cycle_fixed_assignments_per_nurse(self):
+        off_cycle_fixed_assignments = {}
+        for shift in self.off_cycle_shifts_from_fixed_assignments:
+            if shift.assigned_nurse in off_cycle_fixed_assignments:
+                off_cycle_fixed_assignments[shift.assigned_nurse].append(shift)
+            else:
+                off_cycle_fixed_assignments[shift.assigned_nurse] = [shift]
+        return off_cycle_fixed_assignments
+
+    @cached_property
     def available_nurses_per_position_per_timeslot(self):
         positions = {s.short_name: None for s in self.sectors[:12]}
         nurses_per_position_per_timeslot = {}
@@ -540,6 +558,9 @@ class Schedule:
             for nurse in self.available_nurses:
                 if nurse.cycle == ts.cycle and not ts.overlaps_with(self.rest_leave_days[nurse]):
                     the_nurses_per_timeslot[str(ts)].append(nurse)
+
+        # for shift in self.off_cycle_shifts_from_fixed_assignments:
+
         return the_nurses_per_timeslot
 
     @cached_property
@@ -703,7 +724,7 @@ class Schedule:
     def updated_nurses_per_timeslot(self):
         nurses_per_timeslot = copy.deepcopy(self.initial_nurses_per_timeslot)
 
-        # * Add extra shifts for nurses who don't have enough timeslots on their cycle timeslots
+        # * Add extra shiftslots for nurses who don't have enough timeslots on their cycle timeslots
         extra_shiftslots = self.extra_ts_for_nurses_with_ts_deficit
         for nurse in extra_shiftslots:
             for timeslot in extra_shiftslots[nurse]:
