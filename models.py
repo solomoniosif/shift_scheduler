@@ -39,6 +39,13 @@ class TimeSlot:
     def overlaps_with(self, days_list):
         return self.day in days_list or (self.part == 2 and self.day + timedelta(days=1) in days_list)
 
+    def is_adjacent_timeslot(self, other) -> bool:
+        if not isinstance(other, TimeSlot):
+            return NotImplemented
+        return self.day == other.day or (
+                self.day == other.day - timedelta(days=1) and self.part == 2 and other.part == 1) or (
+                       self.day == other.day + timedelta(days=1) and self.part == 1 and other.part == 2)
+
     def __eq__(self, other):
         return self.__class__ == other.__class__ and self.day == other.day and self.part == other.part
 
@@ -232,6 +239,10 @@ class Nurse:
         if off_cycle:
             return shift.position.sector.short_name in self.positions
         return self.cycle == shift.cycle and shift.position.sector.short_name in self.positions
+
+    def is_available(self, timeslot, rest_leave_days, fixed_assignments) -> bool:
+        return self.cycle == timeslot.cycle and not timeslot.overlaps_with(rest_leave_days[self]) and not any(
+            timeslot.is_adjacent_timeslot(s.timeslot) for s in fixed_assignments[self])
 
     def __repr__(self) -> str:
         return f"{self.full_name} [C-{self.cycle}]"
@@ -472,12 +483,10 @@ class Schedule:
 
     @cached_property
     def off_cycle_fixed_assignments_per_nurse(self):
-        off_cycle_fixed_assignments = {}
+        off_cycle_fixed_assignments = {n: [] for n in self.available_nurses}
         for shift in self.off_cycle_shifts_from_fixed_assignments:
-            if shift.assigned_nurse in off_cycle_fixed_assignments:
-                off_cycle_fixed_assignments[shift.assigned_nurse].append(shift)
-            else:
-                off_cycle_fixed_assignments[shift.assigned_nurse] = [shift]
+            off_cycle_fixed_assignments[shift.assigned_nurse].append(shift)
+
         return off_cycle_fixed_assignments
 
     @cached_property
@@ -530,7 +539,7 @@ class Schedule:
         shifts_to_work_per_nurse = {}
         for nurse in self.available_nurses:
             shifts_to_work_per_nurse[nurse] = nurse.shifts_to_work(
-                self.month, off_days=len(self.off_days[nurse])
+                self.month, off_days=len(self.off_days[nurse]) - len(self.off_cycle_fixed_assignments_per_nurse[nurse])
             )
         return shifts_to_work_per_nurse
 
@@ -556,7 +565,8 @@ class Schedule:
         the_nurses_per_timeslot = {str(ts): [] for ts in self.month.timeslots}
         for ts in self.month.timeslots:
             for nurse in self.available_nurses:
-                if nurse.cycle == ts.cycle and not ts.overlaps_with(self.rest_leave_days[nurse]):
+                if nurse.is_available(ts, self.rest_leave_days, self.off_cycle_fixed_assignments_per_nurse):
+                    # if nurse.cycle == ts.cycle and not ts.overlaps_with(self.rest_leave_days[nurse]):
                     the_nurses_per_timeslot[str(ts)].append(nurse)
 
         # for shift in self.off_cycle_shifts_from_fixed_assignments:
