@@ -12,6 +12,7 @@ from utils import TimerLog
 
 ZERO_DAY = date(2022, 1, 1)
 CYCLE_SUCCESSION = [3, 1, 4, 3, 2, 4, 1, 2]
+POA_JIBOU_ZERO_DAY = date(2019, 9, 10)
 
 logger = logging.getLogger('scheduler.models')
 
@@ -123,8 +124,7 @@ class Month:
     @property
     def first_cycle(self) -> int:
         days_delta = (date(self.year, self.month, 1) - ZERO_DAY).days
-        first_shift_id = days_delta * 2
-        return CYCLE_SUCCESSION[first_shift_id % 8]
+        return CYCLE_SUCCESSION[(days_delta * 2) % 8]
 
     @staticmethod
     def get_cycle_of_timetslot(day, part) -> int:
@@ -245,7 +245,7 @@ class Nurse:
             timeslot.is_adjacent_timeslot(s.timeslot) for s in fixed_assignments[self])
 
     def __repr__(self) -> str:
-        return f"{self.full_name} [C-{self.cycle}]"
+        return f"{self.full_name} [{self.cycle}]"
 
 
 class Shift:
@@ -848,6 +848,13 @@ class Schedule:
         for day in self.working_days:
             col = int(day.day) * 2 - 2
             self.schedule_matrix[0][col] = "8"
+
+    @staticmethod
+    def get_poa_jibou_cycle(day):
+        days_delta = (day - POA_JIBOU_ZERO_DAY).days
+        period, period_day = divmod(days_delta, 12)
+        poa_jibou_cycle = ['Oradea', 'Cluj-Napoca'][period % 2]
+        return poa_jibou_cycle, period_day + 1
 
     @TimerLog(logger_name='scheduler.models')
     def create_schedule_matrix(self, solution_dict):
