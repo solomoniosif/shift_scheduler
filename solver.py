@@ -70,6 +70,7 @@ class ScheduleModel(cp_model.CpModel):
                     ) <= 1
                 )
 
+    @TimerLog(logger_name='scheduler.solver')
     def _add_number_of_shifts_per_nurse(self):
         nurses_with_not_enough_cycle_timeslots = self.schedule.nurses_with_not_enough_cycle_timeslots
         for nurse in self.schedule.available_nurses:
@@ -115,6 +116,15 @@ class ScheduleModel(cp_model.CpModel):
                 if max_shifts is not None:
                     add_max_nurse_position(nurse, sector, max_shifts)
 
+    def _maximize_positions_per_nurse(self):
+        for nurse in self.schedule.available_nurses:
+            nurse_positions = []
+            for timeslot in self.schedule.month.timeslots:
+                for shift in self.schedule.all_shifts[str(timeslot)]:
+                    if (nurse.id, timeslot.id, shift.id) in self.variables:
+                        nurse_positions.append(shift.position.sector)
+            self.Maximize(sum([16 - nurse_positions.count(el) for el in list(set(nurse_positions))]))
+
     @TimerLog(logger_name='scheduler.solver')
     def _add_constraints(self):
         self._add_fixed_assignment()
@@ -123,6 +133,7 @@ class ScheduleModel(cp_model.CpModel):
         self._add_number_of_shifts_per_nurse()
         self._add_min_positions()
         self._add_max_positions()
+        self._maximize_positions_per_nurse()
 
 
 class SolutionCollector(cp_model.CpSolverSolutionCallback):
