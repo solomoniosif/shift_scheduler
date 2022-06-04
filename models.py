@@ -844,6 +844,11 @@ class Schedule:
                     self.schedule_matrix[nurse.id - 1][day] = "R"
                 extra_hours[nurse]["recovered_hours"] = recovery_hours
 
+    def _add_lead_nurse_shifts_to_schedule_matrix(self):
+        for day in self.working_days:
+            col = int(day.day) * 2 - 2
+            self.schedule_matrix[0][col] = "8"
+
     @TimerLog(logger_name='scheduler.models')
     def create_schedule_matrix(self, solution_dict):
         self._add_shifts_to_schedule_matrix(solution_dict)
@@ -851,4 +856,5 @@ class Schedule:
         self._add_sick_leaves_to_schedule_matrix()
         self._add_maternity_leaves_to_schedule_matrix()
         self._add_recovery_days_to_schedule_matrix()
+        self._add_lead_nurse_shifts_to_schedule_matrix()
         return self.schedule_matrix
