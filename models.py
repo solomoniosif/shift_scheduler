@@ -856,6 +856,15 @@ class Schedule:
         poa_jibou_cycle = ['Oradea', 'Cluj-Napoca'][period % 2]
         return poa_jibou_cycle, period_day + 1
 
+    @cached_property
+    def poa_jibou_cluj_days(self):
+        cluj_days = []
+        for d in self.month.days_list:
+            poa_jibou_cycle, period_day = self.get_poa_jibou_cycle(d)
+            if poa_jibou_cycle == 'Cluj-Napoca':
+                cluj_days.append(d)
+        return cluj_days
+
     @TimerLog(logger_name='scheduler.models')
     def create_schedule_matrix(self, solution_dict):
         self._add_shifts_to_schedule_matrix(solution_dict)
