@@ -1,7 +1,7 @@
 __pycache__/
 venv/
 .idea/
-secrets.py
-scrap.py
-client_secrets.json
-iosif_upu_service_account.json
+shift_scheduler/secrets.py
+shift_scheduler/scrap.py
+shift_scheduler/client_secrets.json
+shift_scheduler/iosif_upu_service_account.json
