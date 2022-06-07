@@ -2,7 +2,7 @@ import logging
 
 from ortools.sat.python import cp_model
 
-from interface import ScheduleSSManager
+from shift_scheduler.interface import ScheduleSSManager
 from models import Month, Schedule
 from solver import ScheduleModel, SolutionCollector
 from utils import CustomFormatter, TimerLog
