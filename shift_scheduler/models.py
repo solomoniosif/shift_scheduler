@@ -7,7 +7,7 @@ from datetime import date, timedelta
 from functools import cached_property, reduce
 from typing import List, Dict
 
-from shift_scheduler.interface import ScheduleSSManager
+from interface import ScheduleSSManager
 from utils import TimerLog
 
 ZERO_DAY = date(2022, 1, 1)

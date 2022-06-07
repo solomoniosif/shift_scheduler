@@ -8,7 +8,7 @@ from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
 import secrets
-from .utils import TimerLog
+from utils import TimerLog
 
 
 class ScheduleSSManager:
@@ -112,7 +112,7 @@ class ScheduleSSManager:
         self.month = month
         self.month_name = ScheduleSSManager.MONTH_NAMES[self.month - 1]
         self.client = pygsheets.authorize(
-            service_account_file="./iosif_upu_service_account.json"
+            service_account_file="iosif_upu_service_account.json"
         )
         self.this_month_ss = None
 
