@@ -169,7 +169,7 @@ class ScheduleSSManager:
             self.this_month_ss = self.client.open_by_key(new_ss_id)
 
     @cached_property
-    @TimerLog(logger_name='shift_scheduler.interface')
+    @TimerLog(logger_name='scheduler.interface')
     def holiday_list(self) -> List[date]:
         ro_holidays_raw = self.settings_ss.worksheet_by_title("Sarbatori legale").range(
             "C3:C212", returnas="matrix"
@@ -294,37 +294,37 @@ class ScheduleSSManager:
         return self.this_month_ss.url
 
     @cached_property
-    @TimerLog(logger_name='shift_scheduler.interface')
+    @TimerLog(logger_name='scheduler.interface')
     def nurse_list(self) -> List[list]:
         nurses_ws = self.settings_ss.worksheet_by_title("Asistenti")
         return nurses_ws.range("A3:AB101", returnas="matrix")
 
     @cached_property
-    @TimerLog(logger_name='shift_scheduler.interface')
+    @TimerLog(logger_name='scheduler.interface')
     def nurse_min_max(self) -> List[list]:
         nurses_ws = self.settings_ss.worksheet_by_title("Asistenti")
         return nurses_ws.range("AD3:BE102", returnas="matrix")
 
     @cached_property
-    @TimerLog(logger_name='shift_scheduler.interface')
+    @TimerLog(logger_name='scheduler.interface')
     def sector_list(self) -> List[list]:
         sectors_ws = self.settings_ss.worksheet_by_title("Sectoare")
         return sectors_ws.range("A3:F20", returnas="matrix")
 
     @cached_property
-    @TimerLog(logger_name='shift_scheduler.interface')
+    @TimerLog(logger_name='scheduler.interface')
     def position_list(self) -> List[list]:
         sectors_ws = self.settings_ss.worksheet_by_title("Sectoare")
         return sectors_ws.range("N3:P22", returnas="matrix")
 
     @cached_property
-    @TimerLog(logger_name='shift_scheduler.interface')
+    @TimerLog(logger_name='scheduler.interface')
     def sectors_priority(self) -> List[list]:
         sectors_ws = self.settings_ss.worksheet_by_title("Sectoare")
         return sectors_ws.range("N3:O22", returnas="matrix")
 
     @cached_property
-    @TimerLog(logger_name='shift_scheduler.interface')
+    @TimerLog(logger_name='scheduler.interface')
     def planned_rest_leaves(self) -> List[list]:
         rl_ws = self.settings_ss.worksheet_by_title("CO")
         return rl_ws.get_values(
@@ -344,12 +344,12 @@ class ScheduleSSManager:
         return calendar.monthrange(self.year, self.month)[1]
 
     @cached_property
-    @TimerLog(logger_name='shift_scheduler.interface')
+    @TimerLog(logger_name='scheduler.interface')
     def fixed_assignments(self) -> List[list]:
         planificator = self.this_month_ss.worksheet_by_title("Planificator")
         return planificator.range("A16:BM115", returnas="matrix")
 
-    @TimerLog(logger_name='shift_scheduler.interface')
+    @TimerLog(logger_name='scheduler.interface')
     def insert_shifts(self, solution_matrix) -> None:
         planificator = self.this_month_ss.worksheet_by_title("Planificator")
         planificator.update_values(crange="D16", values=solution_matrix)
