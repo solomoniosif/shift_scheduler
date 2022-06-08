@@ -1,11 +1,21 @@
 import pytest
+import sys
 
-from shift_scheduler import interface
+# sys.path.insert(1, 'D:\\dev\\python\\shift_scheduler')
+try:
+    from shift_scheduler.interface import ScheduleSSManager
+except ImportError:
+    import sys
+    from pathlib import Path
+
+    root_folder = Path(__file__).parent.parent.absolute()
+    sys.path.append(str(root_folder))
+    from shift_scheduler.interface import ScheduleSSManager
 
 
 @pytest.fixture()
 def ss_manager():
-    return interface.ScheduleSSManager(2022, 5)
+    return ScheduleSSManager(2022, 5)
 
 
 def test_year(ss_manager):
