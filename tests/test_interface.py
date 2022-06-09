@@ -1,7 +1,6 @@
 import pytest
 import sys
 
-# sys.path.insert(1, 'D:\\dev\\python\\shift_scheduler')
 try:
     from shift_scheduler.interface import ScheduleSSManager
 except ImportError:
