@@ -1,5 +1,4 @@
 import pytest
-import sys
 
 try:
     from shift_scheduler.interface import ScheduleSSManager
