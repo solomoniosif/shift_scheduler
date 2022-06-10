@@ -19,7 +19,7 @@ except ImportError:
 
     from shift_scheduler.interface import ScheduleSSManager
     from shift_scheduler.utils import TimerLog
-    
+
 ZERO_DAY = date(2022, 1, 1)
 CYCLE_SUCCESSION = [3, 1, 4, 3, 2, 4, 1, 2]
 POA_JIBOU_ZERO_DAY = date(2019, 9, 10)
@@ -47,7 +47,7 @@ class TimeSlot:
     def cycle(self) -> int:
         return CYCLE_SUCCESSION[self.ts_id % 8]
 
-    def overlaps_with(self, days_list):
+    def overlaps_with(self, days_list: List[date]) -> bool:
         return self.day in days_list or (self.part == 2 and self.day + timedelta(days=1) in days_list)
 
     def is_adjacent_timeslot(self, other) -> bool:
