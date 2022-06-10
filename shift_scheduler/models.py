@@ -7,9 +7,19 @@ from datetime import date, timedelta
 from functools import cached_property, reduce
 from typing import List, Dict
 
-from interface import ScheduleSSManager
-from utils import TimerLog
+try:
+    from shift_scheduler.interface import ScheduleSSManager
+    from shift_scheduler.utils import TimerLog
+except ImportError:
+    import sys
+    from pathlib import Path
 
+    root_folder = Path(__file__).parent.parent.absolute()
+    sys.path.append(str(root_folder))
+
+    from shift_scheduler.interface import ScheduleSSManager
+    from shift_scheduler.utils import TimerLog
+    
 ZERO_DAY = date(2022, 1, 1)
 CYCLE_SUCCESSION = [3, 1, 4, 3, 2, 4, 1, 2]
 POA_JIBOU_ZERO_DAY = date(2019, 9, 10)
