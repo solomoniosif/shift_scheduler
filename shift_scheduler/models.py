@@ -222,7 +222,7 @@ class Nurse:
             id: int,
             first_name: str,
             last_name: str,
-            positions: List[Sector],
+            positions: List[str],
             cycle=None,
             is_unavailable: bool = False,
             extra_hours_worked: int = 0,
