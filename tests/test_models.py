@@ -182,3 +182,13 @@ def test_position_eq(all_positions, sectors_lookup):
 
 def test_unique_nurse_id(all_nurses):
     assert len(all_nurses) == len({nurse.id for nurse in all_nurses})
+
+
+def test_nurse_shifts_to_work(sample_nurse, sample_month):
+    assert sample_nurse.shifts_to_work(sample_month) == 14
+    assert sample_nurse.shifts_to_work(sample_month, off_days=3) == 12
+
+
+def test_nurse_can_work_shift(sample_nurse, sample_shift):
+    assert not sample_nurse.can_work_shift(sample_shift)
+    assert sample_nurse.can_work_shift(sample_shift, off_cycle=True)
