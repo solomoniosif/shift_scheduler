@@ -129,3 +129,8 @@ def all_nurses(ss_manager):
 @pytest.fixture(scope="session")
 def sample_nurse():
     return models.Nurse(99, "John", "Doe", ['Rt', 'T', 'RCP', 'A', 'M', 'Me', 'Ch', 'L', 'Nn', 'S', 'E'], cycle=1)
+
+
+@pytest.fixture(scope="session")
+def sample_shift(sample_timeslot, sample_position):
+    return models.Shift(sample_timeslot, sample_position)
