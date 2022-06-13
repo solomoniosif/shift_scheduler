@@ -11,11 +11,6 @@ except ImportError:
     from shift_scheduler.interface import ScheduleSSManager
 
 
-@pytest.fixture()
-def ss_manager():
-    return ScheduleSSManager(2022, 5)
-
-
 def test_year(ss_manager):
     assert ss_manager.year == 2022
 
