@@ -251,3 +251,17 @@ def test_schedule_rest_leave_days(schedule):
         assert type(schedule.rest_leave_days[nurse]) == list
         if schedule.rest_leave_days[nurse]:
             assert all((True if type(d) == date else False for d in schedule.rest_leave_days[nurse]))
+
+
+def test_schedule_off_days(schedule):
+    assert type(schedule.off_days) == dict
+    assert len(schedule.off_days) == len(schedule.nurses)
+    for nurse in schedule.off_days:
+        assert len(schedule.off_days[nurse]) <= len(schedule.rest_leave_days[nurse])
+
+
+def test_schedule_all_off_days_are_working_days(schedule):
+    for nurse in schedule.off_days:
+        if schedule.off_days[nurse]:
+            for day in schedule.off_days[nurse]:
+                assert day.weekday() < 5
