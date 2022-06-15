@@ -192,3 +192,15 @@ def test_nurse_shifts_to_work(sample_nurse, sample_month):
 def test_nurse_can_work_shift(sample_nurse, sample_shift):
     assert not sample_nurse.can_work_shift(sample_shift)
     assert sample_nurse.can_work_shift(sample_shift, off_cycle=True)
+
+
+#################################
+#   Tests for Shift Class       #
+#################################
+
+def test_shift_no_assigned_nurse(sample_shift):
+    assert not sample_shift.assigned_nurse
+
+
+def test_correct_shift_cycle(sample_shift, sample_timeslot):
+    assert sample_shift.cycle == sample_timeslot.cycle
