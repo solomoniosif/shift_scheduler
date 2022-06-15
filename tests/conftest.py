@@ -182,6 +182,11 @@ def all_shifts(all_timeslots, all_positions):
     return all_shifts
 
 
+@pytest.fixture(scope="session")
+def sample_shift(sample_timeslot, sample_position):
+    return models.Shift(sample_timeslot, sample_position)
+
+
 ########################################
 #   Fixtures for Shift                 #
 ########################################
