@@ -14,15 +14,36 @@ except ImportError:
     from shift_scheduler import interface, models
 
 
+########################################
+#   Fixtures for ScheduleSSManager     #
+########################################
+
 @pytest.fixture(scope="session")
 def ss_manager():
     return interface.ScheduleSSManager(2022, 5)
 
 
+########################################
+#   Fixtures for Timeslot              #
+########################################
+
 @pytest.fixture(scope="session")
 def sample_timeslot():
     return models.TimeSlot(date(2022, 1, 1), 1)
 
+
+@pytest.fixture(scope="session")
+def all_month_timeslots(sample_month):
+    all_timeslots = []
+    for d in sample_month.days_list:
+        for p in [1, 2]:
+            all_timeslots.append(models.TimeSlot(d, p))
+    return all_timeslots
+
+
+########################################
+#   Fixtures for Month                 #
+########################################
 
 @pytest.fixture(scope="session")
 def january_legal_holidays():
@@ -33,6 +54,10 @@ def january_legal_holidays():
 def sample_month(january_legal_holidays):
     return models.Month(2022, 1, january_legal_holidays)
 
+
+########################################
+#   Fixtures for Sector                #
+########################################
 
 @pytest.fixture(scope="session")
 def all_sectors(ss_manager):
@@ -77,11 +102,15 @@ def sample_sectors():
         [15, '12', '12', 0, 0, 3]
 
     ]
-    all_sectors = []
+    sample_sectors = []
     for row in sectors_data:
         all_sectors.append(models.Sector(row[0], row[2], row[1], row[3], row[4], row[5]))
-    return all_sectors
+    return sample_sectors
 
+
+########################################
+#   Fixtures for Position              #
+########################################
 
 @pytest.fixture(scope="session")
 def sample_position():
@@ -99,6 +128,10 @@ def all_positions(ss_manager, sectors_lookup):
             positions.append(models.Position(id, name, sector))
     return positions
 
+
+########################################
+#   Fixtures for Nurses                #
+########################################
 
 @pytest.fixture(scope="session")
 def all_nurses(ss_manager):
@@ -134,3 +167,16 @@ def sample_nurse():
 @pytest.fixture(scope="session")
 def sample_shift(sample_timeslot, sample_position):
     return models.Shift(sample_timeslot, sample_position)
+
+
+########################################
+#   Fixtures for Shift                 #
+########################################
+
+@pytest.fixture(scope="session")
+def all_shifts(all_timeslots, all_positions):
+    all_shifts = []
+    for t in all_timeslots:
+        for p in all_positions:
+            all_shifts.append(models.Shift(t, p))
+    return all_shifts
