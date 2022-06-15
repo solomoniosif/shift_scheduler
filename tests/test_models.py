@@ -222,3 +222,32 @@ def test_schedule_month_type(schedule):
 def test_schedule_all_nurses_initialized(schedule, all_nurses):
     assert len(schedule.nurses) == 85
     assert len(schedule.nurses) == len(all_nurses)
+
+
+def test_schedule_available_nurses_filtered_correctly(schedule):
+    for nurse in schedule.available_nurses:
+        assert nurse.cycle in [1, 2, 3, 4]
+
+
+def test_schedule_all_sectors_initialized(schedule, all_sectors):
+    assert len(schedule.sectors) == 15
+    assert len(schedule.sectors) == len(all_sectors)
+
+
+def test_schedule_all_positions_initialized(schedule, all_positions):
+    assert len(schedule.positions) == 20
+    assert len(schedule.positions) == len(all_positions)
+
+
+def test_schedule_nurse_position_ranges(schedule):
+    assert type(schedule.nurse_position_ranges) == dict
+    assert len(schedule.nurse_position_ranges) == len(schedule.nurses)
+
+
+def test_schedule_rest_leave_days(schedule):
+    assert type(schedule.rest_leave_days) == dict
+    assert len(schedule.rest_leave_days) == len(schedule.nurses)
+    for nurse in schedule.rest_leave_days:
+        assert type(schedule.rest_leave_days[nurse]) == list
+        if schedule.rest_leave_days[nurse]:
+            assert all((True if type(d) == date else False for d in schedule.rest_leave_days[nurse]))
