@@ -180,3 +180,12 @@ def all_shifts(all_timeslots, all_positions):
         for p in all_positions:
             all_shifts.append(models.Shift(t, p))
     return all_shifts
+
+
+########################################
+#   Fixtures for Shift                 #
+########################################
+
+@pytest.fixture(scope="session")
+def schedule(ss_manager):
+    return models.Schedule(ss_manager)
