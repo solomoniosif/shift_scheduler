@@ -204,3 +204,21 @@ def test_shift_no_assigned_nurse(sample_shift):
 
 def test_correct_shift_cycle(sample_shift, sample_timeslot):
     assert sample_shift.cycle == sample_timeslot.cycle
+
+
+#################################
+#   Tests for Schedule Class    #
+#################################
+
+def test_schedule_year_month(schedule, ss_manager):
+    assert schedule.year == ss_manager.year
+    assert schedule.mnth == ss_manager.month
+
+
+def test_schedule_month_type(schedule):
+    assert type(schedule.month) == models.Month
+
+
+def test_schedule_all_nurses_initialized(schedule, all_nurses):
+    assert len(schedule.nurses) == 85
+    assert len(schedule.nurses) == len(all_nurses)
