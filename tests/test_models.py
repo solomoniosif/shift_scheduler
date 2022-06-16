@@ -270,6 +270,14 @@ def test_schedule_all_off_days_are_working_days(schedule):
 def test_schedule_fixed_assignments(schedule):
     assert type(schedule.fixed_assignments) == list
     if schedule.fixed_assignments:
-        for s in schedule.fixed_assignments:
-            assert type(s) == models.Shift
-            assert s.assigned_nurse
+        for shift in schedule.fixed_assignments:
+            assert type(shift) == models.Shift
+            assert shift.assigned_nurse
+
+
+def test_schedule_off_cycle_shifts_from_fixed_assignments(schedule):
+    assert type(schedule.off_cycle_shifts_from_fixed_assignments) == list
+    if schedule.off_cycle_shifts_from_fixed_assignments:
+        for shift in schedule.off_cycle_shifts_from_fixed_assignments:
+            assert type(shift) == models.Shift
+            assert shift.cycle != shift.assigned_nurse.cycle
