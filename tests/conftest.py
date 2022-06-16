@@ -188,7 +188,7 @@ def sample_shift(sample_timeslot, sample_position):
 
 
 ########################################
-#   Fixtures for Shift                 #
+#   Fixtures for Schedule              #
 ########################################
 
 @pytest.fixture(scope="session")
