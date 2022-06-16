@@ -281,3 +281,12 @@ def test_schedule_off_cycle_shifts_from_fixed_assignments(schedule):
         for shift in schedule.off_cycle_shifts_from_fixed_assignments:
             assert type(shift) == models.Shift
             assert shift.cycle != shift.assigned_nurse.cycle
+
+
+def test_schedule_off_cycle_fixed_assignments_per_nurse(schedule):
+    assert type(schedule.off_cycle_fixed_assignments_per_nurse) == dict
+    for nurse in schedule.off_cycle_fixed_assignments_per_nurse:
+        if schedule.off_cycle_fixed_assignments_per_nurse[nurse]:
+            assert type(schedule.off_cycle_fixed_assignments_per_nurse[nurse]) == list
+            assert all((True if type(s) == models.Shift else False for s in
+                        schedule.off_cycle_fixed_assignments_per_nurse[nurse]))
