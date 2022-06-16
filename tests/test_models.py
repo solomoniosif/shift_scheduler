@@ -265,3 +265,11 @@ def test_schedule_all_off_days_are_working_days(schedule):
         if schedule.off_days[nurse]:
             for day in schedule.off_days[nurse]:
                 assert day.weekday() < 5
+
+
+def test_schedule_fixed_assignments(schedule):
+    assert type(schedule.fixed_assignments) == list
+    if schedule.fixed_assignments:
+        for s in schedule.fixed_assignments:
+            assert type(s) == models.Shift
+            assert s.assigned_nurse
