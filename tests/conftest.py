@@ -20,7 +20,9 @@ except ImportError:
 
 @pytest.fixture(scope="session")
 def ss_manager():
-    return interface.ScheduleSSManager(2022, 5)
+    ss_manager = interface.ScheduleSSManager(2022, 5)
+    ss_manager.get_or_create_new_ss()
+    return ss_manager
 
 
 ########################################
