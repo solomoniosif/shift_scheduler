@@ -295,5 +295,13 @@ def test_schedule_off_cycle_fixed_assignments_per_nurse(schedule):
 def test_schedule_available_nurses_per_position_per_timeslot(schedule):
     assert type(schedule.available_nurses_per_position_per_timeslot) == dict
     for timeslot, position in schedule.available_nurses_per_position_per_timeslot:
+        assert type(schedule.available_nurses_per_position_per_timeslot[(timeslot, position)]) == list
         assert len(schedule.available_nurses_per_position_per_timeslot[(timeslot, position)]) >= 1
-    
+
+
+def test_schedule_timeslots_with_skill_deficit(schedule):
+    assert type(schedule.timeslots_with_skill_deficit) == dict
+    for timeslot, position in schedule.timeslots_with_skill_deficit:
+        assert type(schedule.timeslots_with_skill_deficit[(timeslot, position)]) == list
+        assert len(schedule.timeslots_with_skill_deficit[(timeslot, position)]) <= 3
+        assert position in ('Rt', 'Nn', 'S')
