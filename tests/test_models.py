@@ -290,3 +290,10 @@ def test_schedule_off_cycle_fixed_assignments_per_nurse(schedule):
             assert type(schedule.off_cycle_fixed_assignments_per_nurse[nurse]) == list
             assert all((True if type(s) == models.Shift else False for s in
                         schedule.off_cycle_fixed_assignments_per_nurse[nurse]))
+
+
+def test_schedule_available_nurses_per_position_per_timeslot(schedule):
+    assert type(schedule.available_nurses_per_position_per_timeslot) == dict
+    for timeslot, position in schedule.available_nurses_per_position_per_timeslot:
+        assert len(schedule.available_nurses_per_position_per_timeslot[(timeslot, position)]) >= 1
+    
