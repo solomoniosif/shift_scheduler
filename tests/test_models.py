@@ -373,3 +373,28 @@ def test_schedule_possible_extra_ts_for_nurses_with_ts_deficit(schedule):
         assert all((True if type(t) == models.TimeSlot else False for t in
                     schedule.possible_extra_ts_for_nurses_with_ts_deficit[nurse]))
 
+
+def test_schedule_extra_ts_for_nurses_with_ts_deficit(schedule):
+    assert type(schedule.extra_ts_for_nurses_with_ts_deficit) == dict
+    for nurse in schedule.extra_ts_for_nurses_with_ts_deficit:
+        assert type(schedule.extra_ts_for_nurses_with_ts_deficit[nurse]) == list
+        assert len(schedule.extra_ts_for_nurses_with_ts_deficit[nurse]) == \
+               schedule.nurses_with_not_enough_cycle_timeslots[nurse]['extra_timeslots_needed']
+
+
+def test_schedule_initial_nurses_per_timeslot(schedule):
+    assert type(schedule.initial_nurses_per_timeslot) == dict
+    for ts in schedule.initial_nurses_per_timeslot:
+        assert type(schedule.initial_nurses_per_timeslot[ts]) == dict
+        assert type(schedule.initial_nurses_per_timeslot[ts]['num_nurses']) == int
+        assert 9 <= schedule.initial_nurses_per_timeslot[ts]['num_nurses'] <= 20
+
+
+def test_schedule_check_all_shifts_to_work_planned(schedule):
+    total_stw_per_nurse = sum([schedule.shifts_to_work_per_nurse[nurse] for nurse in schedule.shifts_to_work_per_nurse])
+    total_shiftslots_planned = sum(
+        [schedule.initial_nurses_per_timeslot[ts]['num_nurses'] for ts in schedule.initial_nurses_per_timeslot])
+    total_off_cycle_timeslots = sum(
+        schedule.nurses_with_not_enough_cycle_timeslots[nurse]['extra_timeslots_needed'] for nurse in
+        schedule.nurses_with_not_enough_cycle_timeslots)
+    assert total_stw_per_nurse == total_shiftslots_planned + total_off_cycle_timeslots
