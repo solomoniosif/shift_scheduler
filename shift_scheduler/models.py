@@ -576,11 +576,7 @@ class Schedule:
         for ts in self.month.timeslots:
             for nurse in self.available_nurses:
                 if nurse.is_available(ts, self.rest_leave_days, self.off_cycle_fixed_assignments_per_nurse):
-                    # if nurse.cycle == ts.cycle and not ts.overlaps_with(self.rest_leave_days[nurse]):
                     the_nurses_per_timeslot[str(ts)].append(nurse)
-
-        # for shift in self.off_cycle_shifts_from_fixed_assignments:
-
         return the_nurses_per_timeslot
 
     @cached_property
