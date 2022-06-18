@@ -325,3 +325,25 @@ def test_schedule_updated_shifts_to_work_per_cycle(schedule):
     assert type(schedule.updated_shifts_to_work_per_cycle) == dict
     for cycle in schedule.updated_shifts_to_work_per_cycle:
         assert type(schedule.updated_shifts_to_work_per_cycle[cycle]) == int
+
+
+def test_schedule_check_total_shifts_to_work(schedule):
+    total_stw_per_nurse = sum([schedule.shifts_to_work_per_nurse[nurse] for nurse in schedule.shifts_to_work_per_nurse])
+    total_stw_per_cycle = sum(schedule.shifts_to_work_per_cycle[cycle] for cycle in schedule.shifts_to_work_per_cycle)
+    assert total_stw_per_nurse == total_stw_per_cycle
+
+
+def test_schedule_available_nurses_per_timeslot(schedule):
+    assert type(schedule.available_nurses_per_timeslot) == dict
+    for ts in schedule.available_nurses_per_timeslot:
+        assert type(schedule.available_nurses_per_timeslot[ts]) == list
+        assert all((True if type(n) == models.Nurse else False for n in schedule.available_nurses_per_timeslot[ts]))
+        assert len(schedule.available_nurses_per_timeslot[ts]) >= 9
+
+
+def test_schedule_available_timeslots_per_nurse(schedule):
+    assert type(schedule.available_timeslots_per_nurse) == dict
+    for nurse in schedule.available_timeslots_per_nurse:
+        assert type(schedule.available_timeslots_per_nurse[nurse]) == list
+        assert all(
+            (True if type(ts) == models.TimeSlot else False for ts in schedule.available_timeslots_per_nurse[nurse]))
