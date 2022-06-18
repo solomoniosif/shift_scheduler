@@ -305,3 +305,23 @@ def test_schedule_timeslots_with_skill_deficit(schedule):
         assert type(schedule.timeslots_with_skill_deficit[(timeslot, position)]) == list
         assert len(schedule.timeslots_with_skill_deficit[(timeslot, position)]) <= 3
         assert position in ('Rt', 'Nn', 'S')
+
+
+def test_schedule_shifts_to_work_per_nurse(schedule):
+    assert type(schedule.shifts_to_work_per_nurse) == dict
+    assert len(schedule.shifts_to_work_per_nurse) == len(schedule.available_nurses)
+    for nurse in schedule.shifts_to_work_per_nurse:
+        assert type(schedule.shifts_to_work_per_nurse[nurse]) == int
+        assert schedule.shifts_to_work_per_nurse[nurse] <= 16
+
+
+def test_schedule_shifts_to_work_per_cycle(schedule):
+    assert type(schedule.shifts_to_work_per_cycle) == dict
+    for cycle in schedule.shifts_to_work_per_cycle:
+        assert type(schedule.shifts_to_work_per_cycle[cycle]) == int
+
+
+def test_schedule_updated_shifts_to_work_per_cycle(schedule):
+    assert type(schedule.updated_shifts_to_work_per_cycle) == dict
+    for cycle in schedule.updated_shifts_to_work_per_cycle:
+        assert type(schedule.updated_shifts_to_work_per_cycle[cycle]) == int
