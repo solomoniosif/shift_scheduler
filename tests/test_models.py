@@ -347,3 +347,11 @@ def test_schedule_available_timeslots_per_nurse(schedule):
         assert type(schedule.available_timeslots_per_nurse[nurse]) == list
         assert all(
             (True if type(ts) == models.TimeSlot else False for ts in schedule.available_timeslots_per_nurse[nurse]))
+
+
+def test_schedule_nurses_with_not_enough_cycle_timeslots(schedule):
+    assert type(schedule.nurses_with_not_enough_cycle_timeslots) == dict
+    for nurse in schedule.nurses_with_not_enough_cycle_timeslots:
+        assert schedule.shifts_to_work_per_nurse[nurse] > len(schedule.available_timeslots_per_nurse[nurse])
+        assert type(schedule.nurses_with_not_enough_cycle_timeslots[nurse]['extra_timeslots_needed']) == int
+        assert nurse in schedule.available_nurses
