@@ -1,9 +1,10 @@
 from datetime import date
 
 import pytest
+from ortools.sat.python import cp_model
 
 try:
-    from shift_scheduler import interface, models
+    from shift_scheduler import interface, models, solver
 except ImportError:
     import sys
     from pathlib import Path
@@ -11,7 +12,7 @@ except ImportError:
     root_folder = Path(__file__).parent.parent.absolute()
     sys.path.append(str(root_folder))
 
-    from shift_scheduler import interface, models
+    from shift_scheduler import interface, models, solver
 
 
 ########################################
@@ -196,3 +197,22 @@ def sample_shift(sample_timeslot, sample_position):
 @pytest.fixture(scope="session")
 def schedule(ss_manager):
     return models.Schedule(ss_manager)
+
+
+########################################
+#   Fixtures for ScheduleModel         #
+########################################
+
+@pytest.fixture(scope="session")
+def model(schedule):
+    return solver.ScheduleModel(schedule)
+
+
+@pytest.fixture(scope="session")
+def solver():
+    return cp_model.CpSolver()
+
+
+@pytest.fixture(scope="session")
+def solution_printer(model, schedule):
+    return solver.SolutionCollector(model.variables, schedule)
