@@ -1,6 +1,15 @@
 from ortools.sat.python import cp_model
 
-from utils import TimerLog
+try:
+    from shift_scheduler.utils import TimerLog
+except ImportError:
+    import sys
+    from pathlib import Path
+
+    root_folder = Path(__file__).parent.parent.absolute()
+    sys.path.append(str(root_folder))
+
+    from shift_scheduler.utils import TimerLog
 
 
 class ScheduleModel(cp_model.CpModel):
