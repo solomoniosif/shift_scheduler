@@ -209,7 +209,7 @@ def model(schedule):
 
 
 @pytest.fixture(scope="session")
-def solver():
+def cp_solver():
     return cp_model.CpSolver()
 
 
