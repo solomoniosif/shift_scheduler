@@ -401,6 +401,10 @@ class Schedule:
         return positions
 
     @cached_property
+    def positions_lookup(self):
+        return {p.id: p for p in self.positions}
+
+    @cached_property
     @TimerLog(logger_name='scheduler.models')
     def nurse_position_ranges(self):
         nurse_ranges_matrix = self.ss_manager.nurse_min_max
@@ -761,6 +765,14 @@ class Schedule:
                 all_shifts[str(ts)].append(shift)
 
         return all_shifts
+
+    @cached_property
+    def shifts_lookup(self):
+        shifts_lookup_by_id = {}
+        for ts in self.all_shifts:
+            for shift in self.all_shifts[ts]:
+                shifts_lookup_by_id[shift.id] = shift
+        return shifts_lookup_by_id
 
     def _add_shifts_to_schedule_matrix(self, solution_dict):
         for nurse in solution_dict:
