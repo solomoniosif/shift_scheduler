@@ -397,6 +397,10 @@ class Schedule:
         return {s.short_name: s for s in self.sectors}
 
     @cached_property
+    def essential_sectors(self):
+        return [self.sectors_lookup_by_name[s] for s in ['Rt', 'T', 'RCP', 'S', 'Nn']]
+
+    @cached_property
     @TimerLog(logger_name='scheduler.models')
     def positions(self):
         positions_matrix = self.ss_manager.position_list
