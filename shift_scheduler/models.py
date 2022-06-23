@@ -380,6 +380,15 @@ class Schedule:
         return {n.id: n for n in self.nurses}
 
     @cached_property
+    def available_nurses_per_sector(self):
+        nurses_per_sector = {s.short_name: [] for s in self.sectors}
+        for nurse in self.available_nurses:
+            for sector in self.sectors:
+                if sector.short_name in nurse.positions:
+                    nurses_per_sector[sector.short_name].append(nurse)
+        return nurses_per_sector
+
+    @cached_property
     def sectors_lookup(self):
         return {s.id: s for s in self.sectors}
 
