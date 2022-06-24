@@ -168,3 +168,26 @@ class SolutionCollector(cp_model.CpSolverSolutionCallback):
                             self.solution[n].append(s)
                         else:
                             self.solution[n] = [s]
+
+
+class NurseCycleDistributionModel(cp_model.CpModel):
+
+    def __init__(self, schedule):
+        super().__init__()
+        self.schedule = schedule
+        self.variables = self._create_variables()
+        self._add_constraints()
+
+    def _create_variables(self):
+        variables = {}
+        for nurse in self.schedule.available_nurses:
+            for cycle in [1, 2, 3, 4]:
+                variables[(nurse.id, cycle)] = self.NewBoolVar(f"{nurse} works on cycle {cycle}")
+        return variables
+
+    def _add_each_nurse_is_assigned_to_one_cycle(self):
+        for nurse in self.schedule.available_nurses:
+            self.Add(sum([self.variables[nurse.id, cycle] for cycle in [1, 2, 3, 4]]) == 1)
+
+    def _add_constraints(self):
+        self._add_each_nurse_is_assigned_to_one_cycle()
