@@ -189,5 +189,22 @@ class NurseCycleDistributionModel(cp_model.CpModel):
         for nurse in self.schedule.available_nurses:
             self.Add(sum([self.variables[nurse.id, cycle] for cycle in [1, 2, 3, 4]]) == 1)
 
+    def _add_distribute_nurses_evenly(self):
+        min_nurses_per_cycle = len(self.schedule.available_nurses) // 4
+        for cycle in [1, 2, 3, 4]:
+            self.Add(sum([self.variables[nurse.id, cycle] for nurse in
+                          self.schedule.available_nurses]) >= min_nurses_per_cycle)
+            # self.Add(sum([self.variables[nurse.id, cycle] for nurse in
+            #               self.schedule.available_nurses]) <= min_nurses_per_cycle + 1)
+
+    def _add_distribute_nurses_evenly_by_skills(self):
+        for sector in self.schedule.essential_sectors:
+            for cycle in [1, 2, 3, 4]:
+                min_nurses_per_cycle = len(self.schedule.available_nurses_per_sector[sector.short_name]) // 4
+                self.Add(sum([self.variables[n.id, cycle] for n in self.schedule.available_nurses if
+                              sector.short_name in n.positions]) >= min_nurses_per_cycle)
+
     def _add_constraints(self):
         self._add_each_nurse_is_assigned_to_one_cycle()
+        self._add_distribute_nurses_evenly()
+        self._add_distribute_nurses_evenly_by_skills()
