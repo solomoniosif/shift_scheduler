@@ -208,3 +208,17 @@ class NurseCycleDistributionModel(cp_model.CpModel):
         self._add_each_nurse_is_assigned_to_one_cycle()
         self._add_distribute_nurses_evenly()
         self._add_distribute_nurses_evenly_by_skills()
+
+
+class NurseDistributionSolutionCollector(cp_model.CpSolverSolutionCallback):
+    def __init__(self, variables, schedule):
+        cp_model.CpSolverSolutionCallback.__init__(self)
+        self.variables = variables
+        self.schedule = schedule
+        self.solution = {1: [], 2: [], 3: [], 4: []}
+
+    def on_solution_callback(self):
+        for n in self.schedule.available_nurses:
+            for c in [1, 2, 3, 4]:
+                if self.Value(self.variables[n.id, c]):
+                    self.solution[c].append(n)
