@@ -357,6 +357,10 @@ class Schedule:
         return [n for n in self.nurses if n.cycle in [1, 2, 3, 4]]
 
     @cached_property
+    def heli_nurses(self):
+        return [n for n in self.nurses if 'E' in n.positions]
+
+    @cached_property
     @TimerLog(logger_name='scheduler.models')
     def sectors(self):
         sectors_matrix = self.ss_manager.sector_list
