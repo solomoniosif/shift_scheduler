@@ -229,6 +229,11 @@ def test_schedule_available_nurses_filtered_correctly(schedule):
         assert nurse.cycle in [1, 2, 3, 4]
 
 
+def test_schedule_heli_nurses(schedule):
+    for nurse in schedule.heli_nurses:
+        assert 'E' in nurse.positions
+
+
 def test_schedule_all_sectors_initialized(schedule, all_sectors):
     assert len(schedule.sectors) == 15
     assert len(schedule.sectors) == len(all_sectors)
