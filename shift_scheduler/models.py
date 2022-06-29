@@ -361,6 +361,10 @@ class Schedule:
         return [n for n in self.nurses if 'E' in n.positions]
 
     @cached_property
+    def nurses_with_7_positions(self):
+        return [n for n in self.available_nurses if len(n.positions) == 10]
+
+    @cached_property
     @TimerLog(logger_name='scheduler.models')
     def sectors(self):
         sectors_matrix = self.ss_manager.sector_list
