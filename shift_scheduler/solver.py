@@ -203,6 +203,11 @@ class NurseCycleDistributionModel(cp_model.CpModel):
                 min_nurses_per_cycle = len(self.schedule.available_nurses_per_sector[sector.short_name]) // 4
                 self.Add(sum([self.variables[n.id, cycle] for n in self.schedule.available_nurses if
                               sector.short_name in n.positions]) >= min_nurses_per_cycle)
+        for nurse in self.schedule.nurses_with_7_positions:
+            for cycle in [1, 2, 3, 4]:
+                min_nurses_per_cycle = len(self.schedule.nurses_with_7_positions) // 4
+                self.Add(sum([self.variables[n.id, cycle] for n in
+                              self.schedule.nurses_with_7_positions]) >= min_nurses_per_cycle)
 
     def _add_constraints(self):
         self._add_each_nurse_is_assigned_to_one_cycle()
