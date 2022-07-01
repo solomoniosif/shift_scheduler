@@ -2,14 +2,21 @@ from ortools.sat.python import cp_model
 import pytest
 
 try:
-    from shift_scheduler.solver import ScheduleModel, SolutionCollector
+    from shift_scheduler.solver import ScheduleModel, SolutionCollector, NurseCycleDistributionModel, \
+        NurseDistributionSolutionCollector
 except ImportError:
     import sys
     from pathlib import Path
 
     root_folder = Path(__file__).parent.parent.absolute()
     sys.path.append(str(root_folder))
-    from shift_scheduler.solver import ScheduleModel, SolutionCollector
+    from shift_scheduler.solver import ScheduleModel, SolutionCollector, NurseCycleDistributionModel, \
+        NurseDistributionSolutionCollector
+
+
+#################################
+#   Tests for ScheduleModel     #
+#################################
 
 
 def test_model_variables_created(model):
@@ -35,3 +42,17 @@ def test_model_variables_valid_nurse_positions(schedule, model):
 def test_solver_status_name(model, cp_solver, solution_printer):
     cp_solver.Solve(model, solution_printer)
     assert cp_solver.StatusName() == 'OPTIMAL'
+
+
+###############################################
+#   Tests for NurseCycleDistributionModel     #
+###############################################
+
+def test_ncd_model_variables(ncd_model):
+    assert ncd_model.variables
+
+
+def test_ncd_model_variables_types(ncd_model):
+    assert type(ncd_model.variables) == dict
+    for var in ncd_model.variables:
+        assert type(ncd_model.variables[var]) == cp_model.IntVar
