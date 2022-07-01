@@ -216,3 +216,17 @@ def cp_solver():
 @pytest.fixture(scope="session")
 def solution_printer(model, schedule):
     return solver.SolutionCollector(model.variables, schedule)
+
+
+######################################################
+#   Fixtures for NurseCycleDistributionModel         #
+######################################################
+
+@pytest.fixture(scope="session")
+def ncd_model(schedule):
+    return solver.NurseCycleDistributionModel(schedule)
+
+
+@pytest.fixture(scope="session")
+def ncd_solution_collector(ncd_model, schedule):
+    return solver.NurseDistributionSolutionCollector(ncd_model.variables, schedule)
