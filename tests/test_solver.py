@@ -50,6 +50,11 @@ def test_solution_types(solution):
         assert all((True if type(s) == models.Shift else False for s in solution[n]))
 
 
+def test_solution_correct_number_of_shifts_planned(solution, schedule):
+    for nurse in solution:
+        assert len(solution[nurse]) == schedule.shifts_to_work_per_nurse[nurse]
+
+
 ###############################################
 #   Tests for NurseCycleDistributionModel     #
 ###############################################
