@@ -2,16 +2,14 @@ from ortools.sat.python import cp_model
 import pytest
 
 try:
-    from shift_scheduler.solver import ScheduleModel, SolutionCollector, NurseCycleDistributionModel, \
-        NurseDistributionSolutionCollector
+    from shift_scheduler import interface, models, solver
 except ImportError:
     import sys
     from pathlib import Path
 
     root_folder = Path(__file__).parent.parent.absolute()
     sys.path.append(str(root_folder))
-    from shift_scheduler.solver import ScheduleModel, SolutionCollector, NurseCycleDistributionModel, \
-        NurseDistributionSolutionCollector
+    from shift_scheduler import interface, models, solver
 
 
 #################################
