@@ -218,6 +218,11 @@ def solution_printer(model, schedule):
     return solver.SolutionCollector(model.variables, schedule)
 
 
+@pytest.fixture(scope="session")
+def solution(solution_printer):
+    return solution_printer.solution
+
+
 ######################################################
 #   Fixtures for NurseCycleDistributionModel         #
 ######################################################
