@@ -42,6 +42,14 @@ def test_solver_status_name(model, cp_solver, solution_printer):
     assert cp_solver.StatusName() == 'OPTIMAL'
 
 
+def test_solution_types(solution):
+    assert type(solution) == dict
+    for n in solution:
+        assert type(n) == models.Nurse
+        assert type(solution[n]) == list
+        assert all((True if type(s) == models.Shift else False for s in solution[n]))
+
+
 ###############################################
 #   Tests for NurseCycleDistributionModel     #
 ###############################################
