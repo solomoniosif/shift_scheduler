@@ -224,7 +224,7 @@ def solution(solution_printer):
 
 
 @pytest.fixture(scope="session")
-def solution_by_timeslot(solution_printer)
+def solution_by_timeslot(solution_printer):
     return solution_printer.solution_by_timeslot
 
 
