@@ -55,6 +55,12 @@ def test_solution_correct_number_of_shifts_planned(solution, schedule):
         assert len(solution[nurse]) == schedule.shifts_to_work_per_nurse[nurse]
 
 
+def test_solution_nurse_can_work_planned_position(solution, schedule):
+    for nurse in solution:
+        for shift in solution[nurse]:
+            assert shift.position.sector.short_name in nurse.positions
+
+
 ###############################################
 #   Tests for NurseCycleDistributionModel     #
 ###############################################
