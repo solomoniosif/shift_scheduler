@@ -223,6 +223,11 @@ def solution(solution_printer):
     return solution_printer.solution
 
 
+@pytest.fixture(scope="session")
+def solution_by_timeslot(solution_printer)
+    return solution_printer.solution_by_timeslot
+
+
 ######################################################
 #   Fixtures for NurseCycleDistributionModel         #
 ######################################################
