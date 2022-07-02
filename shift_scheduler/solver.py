@@ -1,3 +1,4 @@
+from functools import cached_property
 from ortools.sat.python import cp_model
 
 try:
@@ -168,6 +169,14 @@ class SolutionCollector(cp_model.CpSolverSolutionCallback):
                             self.solution[n].append(s)
                         else:
                             self.solution[n] = [s]
+
+    @cached_property
+    def solution_by_timeslot(self):
+        solution_by_timeslot = {ts: [] for ts in self.timeslots}
+        for nurse in self.solution:
+            for shift in self.solution[nurse]:
+                solution_by_timeslot[shift.timeslot].append(shift)
+        return solution_by_timeslot
 
 
 class NurseCycleDistributionModel(cp_model.CpModel):
