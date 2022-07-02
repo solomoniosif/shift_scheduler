@@ -61,6 +61,14 @@ def test_solution_nurse_can_work_planned_position(solution, schedule):
             assert shift.position.sector.short_name in nurse.positions
 
 
+def test_solution_by_timeslot_types(solution_by_timeslot):
+    assert type(solution_by_timeslot) == dict
+    for timeslot in solution_by_timeslot:
+        assert type(timeslot) == models.TimeSlot
+        assert type(solution_by_timeslot[timeslot]) == list
+        assert all((True if type(s) == models.Shift else False for s in solution_by_timeslot[timeslot]))
+
+
 ###############################################
 #   Tests for NurseCycleDistributionModel     #
 ###############################################
