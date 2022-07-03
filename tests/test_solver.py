@@ -76,6 +76,14 @@ def test_min_positions_covered(solution_by_timeslot, schedule):
         assert min_positions.issubset(ts_positions)
 
 
+def test_solution_min_positions_planned(solution, schedule):
+    for nurse in schedule.nurse_position_ranges:
+        for sector in schedule.nurse_position_ranges[nurse]:
+            min_sector_shifts = schedule.nurse_position_ranges[nurse][sector]['min']
+            if min_sector_shifts:
+                assert len([s for s in solution[nurse] if s.position.sector == sector]) >= min_sector_shifts
+
+
 ###############################################
 #   Tests for NurseCycleDistributionModel     #
 ###############################################
