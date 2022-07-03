@@ -69,6 +69,13 @@ def test_solution_by_timeslot_types(solution_by_timeslot):
         assert all((True if type(s) == models.Shift else False for s in solution_by_timeslot[timeslot]))
 
 
+def test_min_positions_covered(solution_by_timeslot, schedule):
+    min_positions = set(schedule.positions[:11])
+    for timeslot in solution_by_timeslot:
+        ts_positions = [shift.position for shift in solution_by_timeslot[timeslot]]
+        assert min_positions.issubset(ts_positions)
+
+
 ###############################################
 #   Tests for NurseCycleDistributionModel     #
 ###############################################
