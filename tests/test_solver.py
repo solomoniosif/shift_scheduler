@@ -92,6 +92,11 @@ def test_solution_max_positions_planned(solution, schedule):
                 assert len([s for s in solution[nurse] if s.position.sector == sector]) <= max_sector_shifts
 
 
+def test_solution_fixed_assignments(solution, schedule):
+    for shift in schedule.fixed_assignments:
+        assert shift in solution[shift.assigned_nurse]
+
+
 ###############################################
 #   Tests for NurseCycleDistributionModel     #
 ###############################################
