@@ -97,6 +97,11 @@ def test_solution_fixed_assignments(solution, schedule):
         assert shift in solution[shift.assigned_nurse]
 
 
+def test_solution_all_shifts_planned(solution_by_timeslot, schedule):
+    for timeslot in solution_by_timeslot:
+        assert schedule.updated_nurses_per_timeslot[str(timeslot)]["num_nurses"] == len(solution_by_timeslot[timeslot])
+
+
 ###############################################
 #   Tests for NurseCycleDistributionModel     #
 ###############################################
