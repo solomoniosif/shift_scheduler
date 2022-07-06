@@ -102,6 +102,13 @@ def test_solution_all_shifts_planned(solution_by_timeslot, schedule):
         assert schedule.updated_nurses_per_timeslot[str(timeslot)]["num_nurses"] == len(solution_by_timeslot[timeslot])
 
 
+def test_solution_check_no_2_shifts_per_timeslot(solution_by_timeslot, schedule):
+    for nurse in schedule.available_nurses:
+        for timeslot in solution_by_timeslot:
+            nurse_shifts_on_timeslot = [s for s in solution_by_timeslot[timeslot] if s.assigned_nurse == nurse]
+            assert len(nurse_shifts_on_timeslot) <= 1
+
+
 ###############################################
 #   Tests for NurseCycleDistributionModel     #
 ###############################################
