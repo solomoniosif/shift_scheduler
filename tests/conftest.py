@@ -240,3 +240,8 @@ def ncd_model(schedule):
 @pytest.fixture(scope="session")
 def ncd_solution_collector(ncd_model, schedule):
     return solver.NurseDistributionSolutionCollector(ncd_model.variables, schedule)
+
+
+@pytest.fixture(scope="session")
+def ncd_solution(ncd_solution_collector):
+    return ncd_solution_collector.solution
