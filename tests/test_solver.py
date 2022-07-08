@@ -121,3 +121,9 @@ def test_ncd_model_variables_types(ncd_model):
     assert type(ncd_model.variables) == dict
     for var in ncd_model.variables:
         assert type(ncd_model.variables[var]) == cp_model.IntVar
+
+
+def test_ncd_solution_num_nurses_per_cycle(ncd_solution, schedule):
+    min_nurses_per_cycle = len(schedule.available_nurses) // 4
+    for cycle in ncd_solution:
+        assert len(ncd_solution[cycle]) >= min_nurses_per_cycle
