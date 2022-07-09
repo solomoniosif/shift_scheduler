@@ -295,37 +295,37 @@ class ScheduleSSManager:
 
     @cached_property
     @TimerLog(logger_name='scheduler.interface')
-    def nurse_list(self) -> List[list]:
+    def nurse_list(self) -> List[List[str | int]]:
         nurses_ws = self.settings_ss.worksheet_by_title("Asistenti")
         return nurses_ws.range("A3:AB101", returnas="matrix")
 
     @cached_property
     @TimerLog(logger_name='scheduler.interface')
-    def nurse_min_max(self) -> List[list]:
+    def nurse_min_max(self) -> List[List[str | int]]:
         nurses_ws = self.settings_ss.worksheet_by_title("Asistenti")
         return nurses_ws.range("AD3:BE102", returnas="matrix")
 
     @cached_property
     @TimerLog(logger_name='scheduler.interface')
-    def sector_list(self) -> List[list]:
+    def sector_list(self) -> List[List[str | int]]:
         sectors_ws = self.settings_ss.worksheet_by_title("Sectoare")
         return sectors_ws.range("A3:F20", returnas="matrix")
 
     @cached_property
     @TimerLog(logger_name='scheduler.interface')
-    def position_list(self) -> List[list]:
+    def position_list(self) -> List[List[str | int]]:
         sectors_ws = self.settings_ss.worksheet_by_title("Sectoare")
         return sectors_ws.range("N3:P22", returnas="matrix")
 
     @cached_property
     @TimerLog(logger_name='scheduler.interface')
-    def sectors_priority(self) -> List[list]:
+    def sectors_priority(self) -> List[List[str | int]]:
         sectors_ws = self.settings_ss.worksheet_by_title("Sectoare")
         return sectors_ws.range("N3:O22", returnas="matrix")
 
     @cached_property
     @TimerLog(logger_name='scheduler.interface')
-    def planned_rest_leaves(self) -> List[list]:
+    def planned_rest_leaves(self) -> List[List[str | int]]:
         rl_ws = self.settings_ss.worksheet_by_title("CO")
         return rl_ws.get_values(
             "A3",
@@ -345,11 +345,11 @@ class ScheduleSSManager:
 
     @cached_property
     @TimerLog(logger_name='scheduler.interface')
-    def fixed_assignments(self) -> List[list]:
+    def fixed_assignments(self) -> List[List[str | int]]:
         planificator = self.this_month_ss.worksheet_by_title("Planificator")
         return planificator.range("A16:BM115", returnas="matrix")
 
     @TimerLog(logger_name='scheduler.interface')
-    def insert_shifts(self, solution_matrix) -> None:
+    def insert_shifts(self, solution_matrix: List[List[str]]) -> None:
         planificator = self.this_month_ss.worksheet_by_title("Planificator")
         planificator.update_values(crange="D16", values=solution_matrix)
