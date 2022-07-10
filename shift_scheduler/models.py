@@ -35,7 +35,7 @@ class TimeSlot:
         self.part_name = self.part_names[self.part - 1]
 
     @property
-    def id(self):
+    def id(self) -> int:
         return self.day.day * 2 + self.part - 2
 
     @property
@@ -57,13 +57,13 @@ class TimeSlot:
                 self.day == other.day - timedelta(days=1) and self.part == 2 and other.part == 1) or (
                        self.day == other.day + timedelta(days=1) and self.part == 1 and other.part == 2)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self.__class__ == other.__class__ and self.day == other.day and self.part == other.part
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.day.day}/{self.day.month}/{self.day.year}-{self.part_name}"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.day, self.part))
 
 
