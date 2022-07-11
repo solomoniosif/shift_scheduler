@@ -208,7 +208,7 @@ class Position:
     def __eq__(self, other) -> bool:
         return self.id == other.id and self.sector == other.sector
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.id, self.name, self.sector))
 
 
