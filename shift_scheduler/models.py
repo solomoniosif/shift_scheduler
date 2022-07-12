@@ -223,7 +223,7 @@ class Nurse:
             first_name: str,
             last_name: str,
             positions: List[str],
-            cycle=None,
+            cycle: int = None,
             is_unavailable: bool = False,
             extra_hours_worked: int = 0,
             annual_leave_days: int = 28,
@@ -245,14 +245,14 @@ class Nurse:
         shifts_to_work = math.ceil(hours_to_work / 12)
         return shifts_to_work
 
-    def can_work_shift(self, shift, off_cycle=False):
+    def can_work_shift(self, shift: 'Shift', off_cycle: bool = False) -> bool:
         if off_cycle:
             return shift.position.sector.short_name in self.positions
         return self.cycle == shift.cycle and shift.position.sector.short_name in self.positions
 
-    def is_available(self, timeslot, rest_leave_days, fixed_assignments) -> bool:
-        return self.cycle == timeslot.cycle and not timeslot.overlaps_with(rest_leave_days[self]) and not any(
-            timeslot.is_adjacent_timeslot(s.timeslot) for s in fixed_assignments[self])
+    def is_available(self, timeslot: TimeSlot, rest_leave_days: List[date], fixed_assignments: List['Shift']) -> bool:
+        return self.cycle == timeslot.cycle and not timeslot.overlaps_with(rest_leave_days) and not any(
+            timeslot.is_adjacent_timeslot(s.timeslot) for s in fixed_assignments)
 
     def __repr__(self) -> str:
         return f"{self.full_name} [{self.cycle}]"
@@ -600,7 +600,8 @@ class Schedule:
         the_nurses_per_timeslot = {str(ts): [] for ts in self.month.timeslots}
         for ts in self.month.timeslots:
             for nurse in self.available_nurses:
-                if nurse.is_available(ts, self.rest_leave_days, self.off_cycle_fixed_assignments_per_nurse):
+                if nurse.is_available(ts, self.rest_leave_days[nurse],
+                                      self.off_cycle_fixed_assignments_per_nurse[nurse]):
                     the_nurses_per_timeslot[str(ts)].append(nurse)
         return the_nurses_per_timeslot
 
