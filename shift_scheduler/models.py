@@ -283,22 +283,22 @@ class Shift:
     def cycle(self) -> int:
         return self.timeslot.cycle
 
-    def is_on_same_timeslot(self, other) -> bool:
+    def is_on_same_timeslot(self, other: 'Shift') -> bool:
         if not isinstance(other, Shift):
             return NotImplemented
         return self.timeslot == other.timeslot
 
-    def is_adjacent_shift(self, other) -> bool:
+    def is_adjacent_shift(self, other: 'Shift') -> bool:
         if not isinstance(other, Shift):
             return NotImplemented
         return abs(self.id - other.id) == 1
 
-    def get_timeslots_delta(self, other) -> int:
+    def get_timeslots_delta(self, other: 'Shift') -> int:
         if not isinstance(other, Shift):
             return NotImplemented
         return abs(self.id - other.id)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: 'Shift') -> bool:
         return (
                 self.timeslot == other.timeslot
                 and self.position == other.position
@@ -307,7 +307,7 @@ class Shift:
     def __repr__(self) -> str:
         return f"{self.timeslot} {self.position.sector.short_name}"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.timeslot.day, self.timeslot.part, self.position))
 
 
