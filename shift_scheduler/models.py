@@ -5,7 +5,7 @@ import random
 from calendar import monthrange
 from datetime import date, timedelta
 from functools import cached_property, reduce
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 try:
     from shift_scheduler.interface import ScheduleSSManager
@@ -525,11 +525,11 @@ class Schedule:
         return off_cycle_fixed_assignments
 
     @cached_property
-    def available_nurses_per_position_per_timeslot(self) -> Dict[(str, Position), List[Nurse]]:
+    def available_nurses_per_position_per_timeslot(self) -> Dict[Tuple[str, Position], List[Nurse]]:
         positions = {s.short_name: None for s in self.sectors[:12]}
         nurses_per_position_per_timeslot = {}
 
-        def filter_nurses_by_position(nurses, pos):
+        def filter_nurses_by_position(nurses: List[Nurse], pos: str):
             return [n for n in nurses if pos in n.positions]
 
         for timeslot in self.month.timeslots:
@@ -540,7 +540,7 @@ class Schedule:
         return nurses_per_position_per_timeslot
 
     @cached_property
-    def timeslots_with_skill_deficit(self):
+    def timeslots_with_skill_deficit(self) -> Dict[Tuple[str, Position], List[Nurse]]:
         timeslots_with_skill_deficit = {ts_pos: nurses for (ts_pos, nurses) in
                                         self.available_nurses_per_position_per_timeslot.items() if
                                         ts_pos[1] in ('Rt', 'Nn', 'S') and len(nurses) <= 3}
