@@ -4,9 +4,7 @@ import math
 import random
 from calendar import monthrange
 from datetime import date, timedelta
-from functools import cached_property, reduce
-
-# from typing import List, Dict, Tuple
+from functools import cached_property
 
 try:
     from shift_scheduler.interface import ScheduleSSManager
