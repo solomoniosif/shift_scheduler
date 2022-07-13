@@ -5,6 +5,7 @@ import random
 from calendar import monthrange
 from datetime import date, timedelta
 from functools import cached_property
+from typing import List, Dict, Tuple, Any
 
 try:
     from shift_scheduler.interface import ScheduleSSManager
@@ -548,7 +549,7 @@ class Schedule:
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def shifts_to_work_per_nurse(self):
+    def shifts_to_work_per_nurse(self) -> dict[Nurse, int]:
         shifts_to_work_per_nurse = {}
         for nurse in self.available_nurses:
             shifts_to_work_per_nurse[nurse] = nurse.shifts_to_work(
@@ -558,14 +559,14 @@ class Schedule:
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def shifts_to_work_per_cycle(self):
+    def shifts_to_work_per_cycle(self) -> dict[int, int]:
         shifts_to_work_per_cycle = {1: 0, 2: 0, 3: 0, 4: 0}
         for nurse in self.available_nurses:
             shifts_to_work_per_cycle[nurse.cycle] += self.shifts_to_work_per_nurse[nurse]
         return shifts_to_work_per_cycle
 
     @cached_property
-    def updated_shifts_to_work_per_cycle(self):
+    def updated_shifts_to_work_per_cycle(self) -> dict[int, int]:
         shifts_to_work_per_cycle = copy.deepcopy(self.shifts_to_work_per_cycle)
         for nurse in self.nurses_with_not_enough_cycle_timeslots:
             shifts_to_work_per_cycle[nurse.cycle] -= self.nurses_with_not_enough_cycle_timeslots[nurse][
@@ -574,7 +575,7 @@ class Schedule:
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def available_nurses_per_timeslot(self):
+    def available_nurses_per_timeslot(self) -> dict[str, list[Nurse]]:
         the_nurses_per_timeslot = {str(ts): [] for ts in self.month.timeslots}
         for ts in self.month.timeslots:
             for nurse in self.available_nurses:
@@ -584,7 +585,7 @@ class Schedule:
         return the_nurses_per_timeslot
 
     @cached_property
-    def available_timeslots_per_nurse(self):
+    def available_timeslots_per_nurse(self) -> dict[Nurse, list[TimeSlot]]:
         available_timeslots_per_nurse = {n: [] for n in self.available_nurses}
         for nurse in self.available_nurses:
             for timeslot in self.month.timeslots:
@@ -594,7 +595,7 @@ class Schedule:
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def nurses_with_not_enough_cycle_timeslots(self):
+    def nurses_with_not_enough_cycle_timeslots(self) -> dict[Nurse, dict[str, int]]:
         nurses = {}
         for nurse in self.available_nurses:
             if self.shifts_to_work_per_nurse[nurse] > len(self.available_timeslots_per_nurse[nurse]):
@@ -604,16 +605,16 @@ class Schedule:
         return nurses
 
     @cached_property
-    def timeslots_ordered_by_num_nurses(self):
+    def timeslots_ordered_by_num_nurses(self) -> list[list[TimeSlot | int]]:
         timeslots = []
         for ts in self.month.timeslots:
-            ts_nurses = self.initial_nurses_per_timeslot[str(ts)]["num_nurses"]
+            ts_nurses = int(self.initial_nurses_per_timeslot[str(ts)]["num_nurses"])
             timeslots.append([ts, ts_nurses])
 
         return sorted(timeslots, key=lambda t: (t[1], t[0].part))
 
     @cached_property
-    def possible_extra_ts_for_nurses_with_ts_deficit(self):
+    def possible_extra_ts_for_nurses_with_ts_deficit(self) -> dict[Nurse, list[TimeSlot]]:
         nurses_with_not_enough_cycle_timeslots = self.nurses_with_not_enough_cycle_timeslots
         off_cycle_ts = {1: [(2, 1), (3, 2)], 2: [(4, 1), (1, 2)], 3: [
             (1, 1), (4, 2)], 4: [(3, 1), (2, 2)]}
@@ -631,7 +632,7 @@ class Schedule:
         return possible_extra_timeslots_per_nurse
 
     @cached_property
-    def extra_ts_for_nurses_with_ts_deficit(self):
+    def extra_ts_for_nurses_with_ts_deficit(self) -> dict[Nurse, list[TimeSlot]]:
         possible_extra_timeslots_per_nurse = self.possible_extra_ts_for_nurses_with_ts_deficit
         timeslots_ordered_by_num_nurses = copy.deepcopy(
             self.timeslots_ordered_by_num_nurses)
@@ -649,7 +650,7 @@ class Schedule:
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def initial_nurses_per_timeslot(self):
+    def initial_nurses_per_timeslot(self) -> dict[str, dict[str, str | int | TimeSlot]]:
         cycle_details = {}
         for cycle in [1, 2, 3, 4]:
             cycle_timeslots = self.month.timeslots_per_cycle[cycle]
@@ -741,7 +742,7 @@ class Schedule:
         return nurses_per_timeslot
 
     @cached_property
-    def updated_nurses_per_timeslot(self):
+    def updated_nurses_per_timeslot(self) -> dict[str, dict[str, str | int | TimeSlot]]:
         nurses_per_timeslot = copy.deepcopy(self.initial_nurses_per_timeslot)
 
         # * Add extra shiftslots for nurses who don't have enough timeslots on their cycle timeslots
@@ -754,7 +755,7 @@ class Schedule:
         return nurses_per_timeslot
 
     @cached_property
-    def all_shifts(self):
+    def all_shifts(self) -> dict[str, list[Shift]]:
         all_shifts = {str(ts): [] for ts in self.month.timeslots}
         nurses_per_timeslot = self.updated_nurses_per_timeslot
 
@@ -767,21 +768,21 @@ class Schedule:
         return all_shifts
 
     @cached_property
-    def shifts_lookup(self):
+    def shifts_lookup(self) -> dict[int, Shift]:
         shifts_lookup_by_id = {}
         for ts in self.all_shifts:
             for shift in self.all_shifts[ts]:
                 shifts_lookup_by_id[shift.id] = shift
         return shifts_lookup_by_id
 
-    def _add_shifts_to_schedule_matrix(self, solution_dict):
+    def _add_shifts_to_schedule_matrix(self, solution_dict: dict[Nurse, list[Shift]]) -> None:
         for nurse in solution_dict:
             row = nurse.id - 1
             for shift in solution_dict[nurse]:
                 col = int(shift.timeslot.day.day) * 2 - 3 + shift.timeslot.part
                 self.schedule_matrix[row][col] = shift.position.sector.short_name
 
-    def _add_rest_leaves_to_schedule_matrix(self):
+    def _add_rest_leaves_to_schedule_matrix(self) -> None:
         for nurse in self.off_days:
             if self.off_days[nurse]:
                 row = nurse.id - 1
@@ -789,7 +790,7 @@ class Schedule:
                     col = int(day.day) * 2 - 2
                     self.schedule_matrix[row][col] = "CO"
 
-    def _add_sick_leaves_to_schedule_matrix(self):
+    def _add_sick_leaves_to_schedule_matrix(self) -> None:
         for nurse in self.nurses:
             if nurse.cycle == "CB":
                 row = nurse.id - 1
@@ -797,7 +798,7 @@ class Schedule:
                     col = int(day.day) * 2 - 2
                     self.schedule_matrix[row][col] = "CB"
 
-    def _add_maternity_leaves_to_schedule_matrix(self):
+    def _add_maternity_leaves_to_schedule_matrix(self) -> None:
         for nurse in self.nurses:
             if nurse.cycle == "Ma":
                 row = nurse.id - 1
@@ -806,7 +807,7 @@ class Schedule:
                     self.schedule_matrix[row][col] = "Ma"
 
     @cached_property
-    def monthly_planned_hours(self):
+    def monthly_planned_hours(self) -> dict[Nurse, dict[str, int]]:
         nurse_hours = {
             n: {"worked_hours": 0, "off_work_paid_hours": 0} for n in self.nurses
         }
@@ -824,7 +825,7 @@ class Schedule:
                         nurse_hours[nurse]["off_work_paid_hours"] += 8
         return nurse_hours
 
-    def _add_recovery_days_to_schedule_matrix(self):
+    def _add_recovery_days_to_schedule_matrix(self) -> None:
         hours_to_work = self.month.num_working_days * 8
         extra_hours = {
             n: {"extra_hours_worked": n.extra_hours_worked, "hours_deficit": 0}
@@ -862,20 +863,20 @@ class Schedule:
                     self.schedule_matrix[nurse.id - 1][day] = "R"
                 extra_hours[nurse]["recovered_hours"] = recovery_hours
 
-    def _add_lead_nurse_shifts_to_schedule_matrix(self):
+    def _add_lead_nurse_shifts_to_schedule_matrix(self) -> None:
         for day in self.working_days:
             col = int(day.day) * 2 - 2
             self.schedule_matrix[0][col] = "8"
 
     @staticmethod
-    def get_poa_jibou_cycle(day):
+    def get_poa_jibou_cycle(day: date) -> tuple[str, int]:
         days_delta = (day - POA_JIBOU_ZERO_DAY).days
         period, period_day = divmod(days_delta, 12)
         poa_jibou_cycle = ['Oradea', 'Cluj-Napoca'][period % 2]
         return poa_jibou_cycle, period_day + 1
 
     @cached_property
-    def poa_jibou_cluj_days(self):
+    def poa_jibou_cluj_days(self) -> list[date]:
         cluj_days = []
         for d in self.month.days_list:
             poa_jibou_cycle, period_day = self.get_poa_jibou_cycle(d)
@@ -884,7 +885,7 @@ class Schedule:
         return cluj_days
 
     @TimerLog(logger_name='scheduler.models')
-    def create_schedule_matrix(self, solution_dict):
+    def create_schedule_matrix(self, solution_dict: dict[Nurse, list[Shift]]) -> list[list[str | int]]:
         self._add_shifts_to_schedule_matrix(solution_dict)
         self._add_rest_leaves_to_schedule_matrix()
         self._add_sick_leaves_to_schedule_matrix()
