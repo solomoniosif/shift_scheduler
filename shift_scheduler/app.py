@@ -26,15 +26,15 @@ def main():
     model = ScheduleModel(schedule)
 
     solver = cp_model.CpSolver()
-    solution_printer = SolutionCollector(model.variables, schedule)
+    solution_collector = SolutionCollector(model.variables, schedule)
 
-    status = solver.Solve(model, solution_printer)
+    status = solver.Solve(model, solution_collector)
 
     app_logger.debug("Solution status: %s", solver.StatusName())
 
     response_stats = solver.ResponseStats()
 
-    solution = solution_printer.solution
+    solution = solution_collector.solution
 
     ss_manager.insert_shifts(schedule.create_schedule_matrix(solution))
 
