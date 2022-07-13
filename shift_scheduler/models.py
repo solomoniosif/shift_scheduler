@@ -525,7 +525,7 @@ class Schedule:
         return off_cycle_fixed_assignments
 
     @cached_property
-    def available_nurses_per_position_per_timeslot(self) -> Dict[Tuple[str, Position], List[Nurse]]:
+    def available_nurses_per_position_per_timeslot(self) -> dict[tuple[str, Position], list[Nurse]]:
         positions = {s.short_name: None for s in self.sectors[:12]}
         nurses_per_position_per_timeslot = {}
 
@@ -540,33 +540,12 @@ class Schedule:
         return nurses_per_position_per_timeslot
 
     @cached_property
-    def timeslots_with_skill_deficit(self) -> Dict[Tuple[str, Position], List[Nurse]]:
+    def timeslots_with_skill_deficit(self) -> dict[tuple[str, Position], list[Nurse]]:
         timeslots_with_skill_deficit = {ts_pos: nurses for (ts_pos, nurses) in
                                         self.available_nurses_per_position_per_timeslot.items() if
                                         ts_pos[1] in ('Rt', 'Nn', 'S') and len(nurses) <= 3}
 
         return timeslots_with_skill_deficit
-
-    @cached_property
-    def unfillable_positions(self):
-        unfillable_positions = {}
-
-        def filter_unique_nurses(ts_dict):
-            return set(reduce(lambda x, y: x + y, ts_dict.values()))
-
-        for ts in self.timeslots_with_skill_deficit:
-            timeslot = self.timeslots_with_skill_deficit[ts]
-            positions = len(timeslot)
-            nurses = len(filter_unique_nurses(timeslot))
-            if nurses < positions:
-                unfillable_positions[ts] = timeslot
-
-        for ts in self.available_nurses_per_position_per_timeslot:
-            for position in self.available_nurses_per_position_per_timeslot[ts]:
-                if not self.available_nurses_per_position_per_timeslot[ts][position]:
-                    unfillable_positions[ts] = position
-
-        return unfillable_positions
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
