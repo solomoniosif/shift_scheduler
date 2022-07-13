@@ -5,7 +5,8 @@ import random
 from calendar import monthrange
 from datetime import date, timedelta
 from functools import cached_property, reduce
-from typing import List, Dict, Tuple
+
+# from typing import List, Dict, Tuple
 
 try:
     from shift_scheduler.interface import ScheduleSSManager
@@ -47,7 +48,7 @@ class TimeSlot:
     def cycle(self) -> int:
         return CYCLE_SUCCESSION[self.ts_id % 8]
 
-    def overlaps_with(self, days_list: List[date]) -> bool:
+    def overlaps_with(self, days_list: list[date]) -> bool:
         return self.day in days_list or (self.part == 2 and self.day + timedelta(days=1) in days_list)
 
     def is_adjacent_timeslot(self, other) -> bool:
@@ -88,7 +89,7 @@ class Month:
         "Decembrie",
     ]
 
-    def __init__(self, year: int, month: int, holidays: List[date] = None):
+    def __init__(self, year: int, month: int, holidays: list[date] = None):
         self.year = year
         self.month = month
         self.month_name = Month.MONTH_NAMES[self.month - 1]
@@ -99,11 +100,11 @@ class Month:
         return monthrange(self.year, self.month)[1]
 
     @cached_property
-    def days_list(self) -> List[date]:
+    def days_list(self) -> list[date]:
         return [date(self.year, self.month, d) for d in range(1, self.num_days + 1)]
 
     @cached_property
-    def working_days(self) -> List[date]:
+    def working_days(self) -> list[date]:
         working_days = []
         for d in range(1, self.num_days + 1):
             day = date(self.year, self.month, d)
@@ -116,7 +117,7 @@ class Month:
         return len(self.working_days)
 
     @cached_property
-    def non_working_days(self) -> List[date]:
+    def non_working_days(self) -> list[date]:
         non_working_days = []
         for d in range(1, self.num_days + 1):
             day = date(self.year, self.month, d)
@@ -143,7 +144,7 @@ class Month:
         return CYCLE_SUCCESSION[shiftslot_id % 8]
 
     @property
-    def monthly_shifts_per_cycle(self) -> Dict[int, int]:
+    def monthly_shifts_per_cycle(self) -> dict[int, int]:
         shifts_per_cycle = {1: 0, 2: 0, 3: 0, 4: 0}
         for day in self.days_list:
             for part in [1, 2]:
@@ -152,11 +153,11 @@ class Month:
         return shifts_per_cycle
 
     @cached_property
-    def timeslots(self) -> List[TimeSlot]:
+    def timeslots(self) -> list[TimeSlot]:
         return [TimeSlot(d, p) for d in self.days_list for p in [1, 2]]
 
     @cached_property
-    def timeslots_per_cycle(self) -> Dict[int, List[TimeSlot]]:
+    def timeslots_per_cycle(self) -> dict[int, list[TimeSlot]]:
         cycle_1 = [ts for ts in self.timeslots if ts.cycle == 1]
         cycle_2 = [ts for ts in self.timeslots if ts.cycle == 2]
         cycle_3 = [ts for ts in self.timeslots if ts.cycle == 3]
@@ -222,7 +223,7 @@ class Nurse:
             id: int,
             first_name: str,
             last_name: str,
-            positions: List[str],
+            positions: list[str],
             cycle: int = None,
             is_unavailable: bool = False,
             extra_hours_worked: int = 0,
@@ -250,7 +251,7 @@ class Nurse:
             return shift.position.sector.short_name in self.positions
         return self.cycle == shift.cycle and shift.position.sector.short_name in self.positions
 
-    def is_available(self, timeslot: TimeSlot, rest_leave_days: List[date], fixed_assignments: List['Shift']) -> bool:
+    def is_available(self, timeslot: TimeSlot, rest_leave_days: list[date], fixed_assignments: list['Shift']) -> bool:
         return self.cycle == timeslot.cycle and not timeslot.overlaps_with(rest_leave_days) and not any(
             timeslot.is_adjacent_timeslot(s.timeslot) for s in fixed_assignments)
 
@@ -327,7 +328,7 @@ class Schedule:
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def nurses(self) -> List[Nurse]:
+    def nurses(self) -> list[Nurse]:
         nurses_matrix = self.ss_manager.nurse_list
         nurses = []
         for row in nurses_matrix:
@@ -353,20 +354,20 @@ class Schedule:
         return nurses
 
     @cached_property
-    def available_nurses(self) -> List[Nurse]:
+    def available_nurses(self) -> list[Nurse]:
         return [n for n in self.nurses if n.cycle in [1, 2, 3, 4]]
 
     @cached_property
-    def heli_nurses(self) -> List[Nurse]:
+    def heli_nurses(self) -> list[Nurse]:
         return [n for n in self.nurses if 'E' in n.positions]
 
     @cached_property
-    def nurses_with_7_positions(self) -> List[Nurse]:
+    def nurses_with_7_positions(self) -> list[Nurse]:
         return [n for n in self.available_nurses if len(n.positions) == 10]
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def sectors(self) -> List[Sector]:
+    def sectors(self) -> list[Sector]:
         sectors_matrix = self.ss_manager.sector_list
         sectors = []
         for row in sectors_matrix:
@@ -384,11 +385,11 @@ class Schedule:
         return sectors
 
     @cached_property
-    def nurses_lookup(self) -> Dict[int, Nurse]:
+    def nurses_lookup(self) -> dict[int, Nurse]:
         return {n.id: n for n in self.nurses}
 
     @cached_property
-    def available_nurses_per_sector(self) -> Dict[str, List[Nurse]]:
+    def available_nurses_per_sector(self) -> dict[str, list[Nurse]]:
         nurses_per_sector = {s.short_name: [] for s in self.sectors}
         for nurse in self.available_nurses:
             for sector in self.sectors:
@@ -397,20 +398,20 @@ class Schedule:
         return nurses_per_sector
 
     @cached_property
-    def sectors_lookup(self) -> Dict[int, Sector]:
+    def sectors_lookup(self) -> dict[int, Sector]:
         return {s.id: s for s in self.sectors}
 
     @cached_property
-    def sectors_lookup_by_name(self) -> Dict[str, Sector]:
+    def sectors_lookup_by_name(self) -> dict[str, Sector]:
         return {s.short_name: s for s in self.sectors}
 
     @cached_property
-    def essential_sectors(self) -> List[Sector]:
+    def essential_sectors(self) -> list[Sector]:
         return [self.sectors_lookup_by_name[s] for s in ['Rt', 'T', 'RCP', 'S', 'Nn']]
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def positions(self) -> List[Position]:
+    def positions(self) -> list[Position]:
         positions_matrix = self.ss_manager.position_list
         positions = []
         for row in positions_matrix:
@@ -422,12 +423,12 @@ class Schedule:
         return positions
 
     @cached_property
-    def positions_lookup(self) -> Dict[int, Position]:
+    def positions_lookup(self) -> dict[int, Position]:
         return {p.id: p for p in self.positions}
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def nurse_position_ranges(self) -> Dict[Nurse, Dict[str, int | None]]:
+    def nurse_position_ranges(self) -> dict[Nurse, dict[str, int | None]]:
         nurse_ranges_matrix = self.ss_manager.nurse_min_max
         filtered_sectors = dict(
             filter(lambda val: val[0] <= 13, self.sectors_lookup.items())
@@ -455,7 +456,7 @@ class Schedule:
 
     @cached_property
     @TimerLog(logger_name='scheduler.models')
-    def rest_leave_days(self) -> Dict[Nurse, List[date]]:
+    def rest_leave_days(self) -> dict[Nurse, list[date]]:
         rl_matrix = self.ss_manager.planned_rest_leaves
         rest_leave_days = {n: [] for n in self.nurses}
         for row in rl_matrix:
@@ -478,7 +479,7 @@ class Schedule:
         return rest_leave_days
 
     @cached_property
-    def off_days(self) -> Dict[Nurse, List[date]]:
+    def off_days(self) -> dict[Nurse, list[date]]:
         off_days = {n: [] for n in self.nurses}
         for nurse in self.rest_leave_days:
             if self.rest_leave_days[nurse]:
@@ -488,7 +489,7 @@ class Schedule:
         return off_days
 
     @cached_property
-    def fixed_assignments(self) -> List[Shift]:
+    def fixed_assignments(self) -> list[Shift]:
         fixed_assignments = []
         for row in self.ss_manager.fixed_assignments:
             if row[1] != "":
@@ -509,7 +510,7 @@ class Schedule:
         return fixed_assignments
 
     @cached_property
-    def off_cycle_shifts_from_fixed_assignments(self) -> List[Shift]:
+    def off_cycle_shifts_from_fixed_assignments(self) -> list[Shift]:
         off_cycle_shifts = []
         for shift in self.fixed_assignments:
             if shift.assigned_nurse in self.available_nurses and shift.cycle != shift.assigned_nurse.cycle:
@@ -517,7 +518,7 @@ class Schedule:
         return off_cycle_shifts
 
     @cached_property
-    def off_cycle_fixed_assignments_per_nurse(self) -> Dict[Nurse, List[Shift]]:
+    def off_cycle_fixed_assignments_per_nurse(self) -> dict[Nurse, list[Shift]]:
         off_cycle_fixed_assignments = {n: [] for n in self.available_nurses}
         for shift in self.off_cycle_shifts_from_fixed_assignments:
             off_cycle_fixed_assignments[shift.assigned_nurse].append(shift)
@@ -529,7 +530,7 @@ class Schedule:
         positions = {s.short_name: None for s in self.sectors[:12]}
         nurses_per_position_per_timeslot = {}
 
-        def filter_nurses_by_position(nurses: List[Nurse], pos: str):
+        def filter_nurses_by_position(nurses: list[Nurse], pos: str):
             return [n for n in nurses if pos in n.positions]
 
         for timeslot in self.month.timeslots:
