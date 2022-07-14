@@ -5,7 +5,6 @@ import random
 from calendar import monthrange
 from datetime import date, timedelta
 from functools import cached_property
-from typing import List, Dict, Tuple, Any
 
 try:
     from shift_scheduler.interface import ScheduleSSManager
@@ -20,9 +19,9 @@ except ImportError:
     from shift_scheduler.interface import ScheduleSSManager
     from shift_scheduler.utils import TimerLog
 
-ZERO_DAY = date(2022, 1, 1)
-CYCLE_SUCCESSION = [3, 1, 4, 3, 2, 4, 1, 2]
-POA_JIBOU_ZERO_DAY = date(2019, 9, 10)
+ZERO_DAY: date = date(2022, 1, 1)
+CYCLE_SUCCESSION: list[int] = [3, 1, 4, 3, 2, 4, 1, 2]
+POA_JIBOU_ZERO_DAY: date = date(2019, 9, 10)
 
 logger = logging.getLogger('scheduler.models')
 
@@ -31,8 +30,8 @@ class TimeSlot:
     def __init__(self, day: date, part: int):
         self.day = day
         self.part = part
-        self.part_names = ["Z", "N"]
-        self.part_name = self.part_names[self.part - 1]
+        self.part_names: list[str] = ["Z", "N"]
+        self.part_name: str = self.part_names[self.part - 1]
 
     @property
     def id(self) -> int:
@@ -73,7 +72,7 @@ class Month:
     It keeps track of working and non-working days
     """
 
-    MONTH_NAMES = [
+    MONTH_NAMES: list[str] = [
         "Ianuarie",
         "Februarie",
         "Martie",
@@ -91,7 +90,7 @@ class Month:
     def __init__(self, year: int, month: int, holidays: list[date] = None):
         self.year = year
         self.month = month
-        self.month_name = Month.MONTH_NAMES[self.month - 1]
+        self.month_name: str = Month.MONTH_NAMES[self.month - 1]
         self.holidays = holidays
 
     @cached_property
@@ -314,11 +313,12 @@ class Shift:
 class Schedule:
     def __init__(self, ss_manager: ScheduleSSManager):
         self.ss_manager = ss_manager
-        self.year = ss_manager.year
-        self.mnth = ss_manager.month
-        self.working_days = self.month.working_days
-        self.positions_per_timeslot = {str(ts): self.positions for ts in self.month.timeslots}
-        self.schedule_matrix = [["" for _ in range(self.month.num_days * 2)] for n in range(100)]
+        self.year: int = ss_manager.year
+        self.mnth: int = ss_manager.month
+        self.working_days: list[date] = self.month.working_days
+        self.positions_per_timeslot: dict[str, list[Position]] = {str(ts): self.positions for ts in
+                                                                  self.month.timeslots}
+        self.schedule_matrix: list[list[str]] = [["" for _ in range(self.month.num_days * 2)] for n in range(100)]
 
     @cached_property
     def month(self) -> Month:
