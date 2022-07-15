@@ -7,6 +7,7 @@ from typing import List, Tuple
 import pygsheets
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
+from pygsheets.client import Client
 
 try:
     from shift_scheduler import secrets
@@ -22,7 +23,7 @@ except ImportError:
 
 
 class ScheduleSSManager:
-    MONTH_NAMES = [
+    MONTH_NAMES: list[str] = [
         "Ianuarie",
         "Februarie",
         "Martie",
@@ -36,7 +37,7 @@ class ScheduleSSManager:
         "Noiembrie",
         "Decembrie",
     ]
-    COLS = [
+    COLS: list[str] = [
         "A",
         "B",
         "C",
@@ -120,11 +121,11 @@ class ScheduleSSManager:
     def __init__(self, year: int, month: int):
         self.year = year
         self.month = month
-        self.month_name = ScheduleSSManager.MONTH_NAMES[self.month - 1]
-        self.client = pygsheets.authorize(
+        self.month_name: str = ScheduleSSManager.MONTH_NAMES[self.month - 1]
+        self.client: Client = pygsheets.authorize(
             service_account_file=secrets.PATH_TO_SERVICE_ACCOUNT_FILE
         )
-        self.this_month_ss = None
+        self.this_month_ss: pygsheets.Spreadsheet | None = None
 
     @cached_property
     def model_ss(self) -> pygsheets.Spreadsheet:
