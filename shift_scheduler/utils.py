@@ -14,13 +14,16 @@ class TimerError(Exception):
 
 
 class TimerLog:
+    """A class used for timing function or method execution and logging this time/or a custom message.
+    Mainly developed to detect slower parts of the program
+    """
 
-    def __init__(self, logger_name, text=None, name=None):
+    def __init__(self, logger_name: str, text: str = None, name: str = None):
         self.logger_name = logger_name
         self.logger = logging.getLogger(self.logger_name)
         self.text = text
         self.name = name
-        self._start_time = None
+        self._start_time: float | None = None
 
     def start(self):
         if self._start_time is not None:
@@ -66,6 +69,7 @@ class TimerLog:
 
 
 class CustomFormatter(logging.Formatter):
+    """Custom formatter class used to display coloured messages in the console"""
     grey = "\x1b[38;20m"
     yellow = "\x1b[33;20m"
     blue = "\x1b[34m"
