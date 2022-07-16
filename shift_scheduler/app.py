@@ -42,11 +42,10 @@ def main() -> None:
 
     # Search for a feasible solution and save it to a variable
     status = solver.Solve(model, solution_collector)
-
-    app_logger.debug("Solution status: %s", solver.StatusName())
-
-    response_stats = solver.ResponseStats()
     solution = solution_collector.solution
+
+    # Log solver status to console
+    app_logger.debug("Solution status: %s", solver.StatusName())
 
     # Insert solution into target spreadsheet
     if solver.StatusName() in ['OPTIMAL', 'FEASIBLE']:
