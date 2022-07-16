@@ -28,7 +28,7 @@ def main() -> None:
     # Log to console the start of schedule generation
     app_logger.info('Working on a schedule solution for month %s %s', Month.MONTH_NAMES[month - 1], year)
 
-    # Initialize models for given month
+    # Initialize data structures with data from Google Sheet for the given month
     ss_manager = ScheduleSSManager(year, month)
     this_month_ss = ss_manager.get_or_create_new_ss()
     schedule = Schedule(ss_manager)
