@@ -127,7 +127,7 @@ class Month:
     def num_non_working_days(self) -> int:
         return len(self.non_working_days)
 
-    def num_working_hours(self, daily_norm=8) -> int:
+    def num_working_hours(self, daily_norm: int = 8) -> int:
         return self.num_working_days * daily_norm
 
     @property
@@ -136,7 +136,7 @@ class Month:
         return CYCLE_SUCCESSION[(days_delta * 2) % 8]
 
     @staticmethod
-    def get_cycle_of_timetslot(day, part) -> int:
+    def get_cycle_of_timetslot(day, part: int) -> int:
         days_delta = (day - ZERO_DAY).days
         shiftslot_id = days_delta * 2 + (part - 1)
         return CYCLE_SUCCESSION[shiftslot_id % 8]
@@ -529,7 +529,7 @@ class Schedule:
         positions = {s.short_name: None for s in self.sectors[:12]}
         nurses_per_position_per_timeslot = {}
 
-        def filter_nurses_by_position(nurses: list[Nurse], pos: str):
+        def filter_nurses_by_position(nurses: list[Nurse], pos: str) -> list[Nurse]:
             return [n for n in nurses if pos in n.positions]
 
         for timeslot in self.month.timeslots:
