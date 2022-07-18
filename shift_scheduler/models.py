@@ -27,6 +27,10 @@ logger = logging.getLogger('scheduler.models')
 
 
 class TimeSlot:
+    """
+    A class used to represent half a day, or a 12 hours period that will be used for scheduling a shift
+    """
+
     def __init__(self, day: date, part: int):
         self.day = day
         self.part = part
@@ -69,7 +73,7 @@ class TimeSlot:
 class Month:
     """
     A class used to represent a calendar month for generating the schedule.
-    It keeps track of working and non-working days
+    It keeps track of working and non-working days, shift cycles and timeslots
     """
 
     MONTH_NAMES: list[str] = [
@@ -196,6 +200,10 @@ class Sector:
 
 
 class Position:
+    """
+    A class used to represent a position that a nurse can be assigned to on a specific shift
+    """
+
     def __init__(self, id: int, name: str, sector: Sector):
         self.id = id
         self.name = name
