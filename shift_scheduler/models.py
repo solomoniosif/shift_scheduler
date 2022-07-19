@@ -319,6 +319,10 @@ class Shift:
 
 
 class Schedule:
+    """
+    A class used to centralize all data needed by the solver to generate a monthly schedule
+    """
+
     def __init__(self, ss_manager: ScheduleSSManager):
         self.ss_manager = ss_manager
         self.year: int = ss_manager.year
