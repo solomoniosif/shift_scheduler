@@ -63,7 +63,7 @@ The **SolutionCollector** class extends cp_model.CpSolverSolutionCallback and it
 
 The file **utils.py** contains at the moment the class decorator class **TimerLog** used for conveniently logging time execution of different functions/methods in the project. 
 
-![Shift Scheduler Log](shift_scheduler_log.jpg)
+![Shift Scheduler Log](shift_scheduler_demo.gif)
 
 
 
