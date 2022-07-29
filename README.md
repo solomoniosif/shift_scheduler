@@ -6,6 +6,8 @@
 
 A personal project for generating the monthly schedule for nurses at the Emergency Department in Cluj-Napoca using  Google's OR-Tools CP-SAT Solver. 
 
+![Shift Scheduler Log](shift_scheduler_demo.gif)
+
 ## :dart: Motivation
 
 Creating the monthly schedule for 80+ nurses with only pen & paper when you have into account a multitude of constraints like:
@@ -63,7 +65,6 @@ The **SolutionCollector** class extends cp_model.CpSolverSolutionCallback and it
 
 The file **utils.py** contains at the moment the class decorator class **TimerLog** used for conveniently logging time execution of different functions/methods in the project. 
 
-![Shift Scheduler Log](shift_scheduler_demo.gif)
 
 
 
